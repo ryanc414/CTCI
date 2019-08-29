@@ -11,20 +11,24 @@
 #include <string>
 #include <map>
 
-bool is_unique(const std::string input);
-bool is_unique_no_data_structs(const std::string input);
-bool is_permutation(const std::string str_a, const std::string str_b);
-std::map<char, int> letter_freq(const std::string str);
+bool is_unique(const std::string &input);
+bool is_unique_no_data_structs(const std::string &input);
+bool is_permutation(const std::string &str_a, const std::string &str_b);
+std::map<char, int> letter_freq(const std::string &str);
 void urlify(char *str, size_t buf_len, size_t true_len);
-bool is_palindrome_permutation(std::string str);
+bool is_palindrome_permutation(const std::string &str);
+bool is_one_away(const std::string &str_a, const std::string &str_b);
+bool is_one_replace_away(const std::string &str_a, const std::string &str_b);
+bool is_one_insert_away(const std::string &str_a, const std::string &str_b);
 
 void test_is_unique();
 void test_is_permutation();
 void test_urlify();
 void test_palindrome_permutation();
+void test_one_away();
 
 /* Check if a string has all unique characters. */
-bool is_unique(const std::string input) {
+bool is_unique(const std::string &input) {
     std::map<char, bool> chars_found;
 
     for (char c : input) {
@@ -42,7 +46,7 @@ bool is_unique(const std::string input) {
  * Check if a string has all unique characters. No additional data structures
  * used.
  */
-bool is_unique_no_data_structs(const std::string input) {
+bool is_unique_no_data_structs(const std::string &input) {
     // Make a mutable local copy of the input string and sort it.
     std::string mut_str = input;
     std::sort(mut_str.begin(), mut_str.end());
@@ -60,7 +64,7 @@ bool is_unique_no_data_structs(const std::string input) {
 }
 
 /* Check if two strings are permuations of each other.*/
-bool is_permutation(const std::string str_a, const std::string str_b) {
+bool is_permutation(const std::string &str_a, const std::string &str_b) {
     if (str_a.length() != str_b.length()) {
         return false;
     }
@@ -69,7 +73,7 @@ bool is_permutation(const std::string str_a, const std::string str_b) {
 }
 
 /* Return a mapping of letter to its frequency in a word. */
-std::map<char, int> letter_freq(const std::string str) {
+std::map<char, int> letter_freq(const std::string &str) {
     std::map<char, int> freq;
 
     for (char c : str) {
@@ -105,7 +109,7 @@ void urlify(char *str, size_t buf_len, size_t true_len) {
  * Check if a word is a permutation of a palindrome: a word that reads the
  * same forwards or backwards.
  */
-bool is_palindrome_permutation(std::string str) {
+bool is_palindrome_permutation(const std::string &str) {
     // First generate a mapping of the letter frequencies. We can ignore
     // casing and ignore punctuation characters. For simplicity, assume only
     // letters a-z and not any accented unicode letters etc.
@@ -137,6 +141,70 @@ bool is_palindrome_permutation(std::string str) {
 
     return true;
 }
+
+/**
+ * Assuming a string can be edited by replacing, inserting or removing a
+ * single character, return if a string is one (or zero) edits away.
+ */
+bool is_one_away(const std::string &str_a, const std::string &str_b) {
+    int length_diff = str_a.length() - str_b.length();
+
+    switch (length_diff) {
+        case 0:
+            return is_one_replace_away(str_a, str_b);
+
+        case -1:
+            return is_one_insert_away(str_a, str_b);
+
+        case 1:
+            return is_one_insert_away(str_b, str_a);
+
+        default:
+            return false;
+    }
+}
+
+/* Check if two strings of equal length are at most one character different. */
+bool is_one_replace_away(const std::string &str_a, const std::string &str_b) {
+    bool replace_found = false;
+
+    for (size_t i = 0; i < str_a.length(); ++i) {
+        if (str_a[i] != str_b[i]) {
+            if (replace_found) {
+                return false;
+            } else {
+                replace_found = true;
+            }
+        }
+    }
+
+    return true;
+}
+
+/* Check if str_b is one character insert away from str_a. */
+bool is_one_insert_away(const std::string &str_a, const std::string &str_b) {
+    bool insert_found = false;
+
+    size_t a_ix = 0;
+
+    for (size_t b_ix = 0; b_ix < str_b.length(); ++b_ix) {
+        if (str_a[a_ix] != str_b[b_ix]) {
+            if (insert_found) {
+                return false;
+            } else {
+                insert_found = true;
+            }
+        } else {
+            ++a_ix;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * TESTS
+ */
 
 /* Test both is_unique implementations. */
 void test_is_unique() {
@@ -180,12 +248,22 @@ void test_palindrome_permutation() {
     assert(is_palindrome_permutation(""));
 }
 
+/* Test the is_one_away function. */
+void test_one_away() {
+    assert(is_one_away("pale", "ple"));
+    assert(is_one_away("pales", "pale"));
+    assert(is_one_away("pale", "bale"));
+    assert(!is_one_away("pale", "bae"));
+    assert(is_one_away("", ""));
+}
+
 /* Test all functions. */
 int main() {
     test_is_unique();
     test_is_permutation();
     test_urlify();
     test_palindrome_permutation();
+    test_one_away();
 
     std::cout << "All assertions passed." << std::endl;
 
