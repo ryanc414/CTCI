@@ -16,10 +16,12 @@ bool is_unique_no_data_structs(const std::string input);
 bool is_permutation(const std::string str_a, const std::string str_b);
 std::map<char, int> letter_freq(const std::string str);
 void urlify(char *str, size_t buf_len, size_t true_len);
+bool is_palindrome_permutation(std::string str);
 
 void test_is_unique();
 void test_is_permutation();
 void test_urlify();
+void test_palindrome_permutation();
 
 /* Check if a string has all unique characters. */
 bool is_unique(const std::string input) {
@@ -99,6 +101,43 @@ void urlify(char *str, size_t buf_len, size_t true_len) {
     }
 }
 
+/**
+ * Check if a word is a permutation of a palindrome: a word that reads the
+ * same forwards or backwards.
+ */
+bool is_palindrome_permutation(std::string str) {
+    // First generate a mapping of the letter frequencies. We can ignore
+    // casing and ignore punctuation characters. For simplicity, assume only
+    // letters a-z and not any accented unicode letters etc.
+    constexpr int kNumLetters = 26;
+    std::array<int, kNumLetters> letter_freqs;
+    letter_freqs.fill(0);
+
+    for (char c : str) {
+        if (c >= 'a' && c <= 'z') {
+            ++letter_freqs[c - 'a'];
+        } else if (c >= 'A' && c <= 'Z') {
+            ++letter_freqs[c -'A'];
+        }
+    }
+
+    // Now iterate through the frequencies for each letter. We know that a
+    // string is a permutation of a palindrome iff it has at most 1 character
+    // with an odd frequency - this would be the middle letter in a palindrome.
+    bool odd_found = false;
+    for (int i = 0; i < kNumLetters; ++i) {
+        if (letter_freqs[i] % 2 == 1) {
+            if (odd_found) {
+                return false;
+            } else {
+                odd_found = true;
+            }
+        }
+    }
+
+    return true;
+}
+
 /* Test both is_unique implementations. */
 void test_is_unique() {
     assert(is_unique("abcdefg"));
@@ -134,11 +173,19 @@ void test_urlify() {
     assert(!strcmp(input_buf, expected_output));
 }
 
+/* Test the is_palindrome_permutation function. */
+void test_palindrome_permutation() {
+    assert(is_palindrome_permutation("Tact Coa"));
+    assert(!is_palindrome_permutation("Tact Coat"));
+    assert(is_palindrome_permutation(""));
+}
+
 /* Test all functions. */
 int main() {
     test_is_unique();
     test_is_permutation();
     test_urlify();
+    test_palindrome_permutation();
 
     std::cout << "All assertions passed." << std::endl;
 
