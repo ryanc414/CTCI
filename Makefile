@@ -1,5 +1,5 @@
-CXX = "g++"
-CXXFLAGS = "-Wall"
+CXX = g++
+CXXFLAGS = -Wall -Werror -g -Og
 
 all: bin/arrays_and_strings
 
