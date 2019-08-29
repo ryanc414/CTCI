@@ -83,9 +83,9 @@ std::map<char, int> letter_freq(const std::string str) {
  */
 void urlify(char *str, size_t buf_len, size_t true_len) {
     assert(buf_len >= true_len);
-    size_t new_index = buf_len - 1;
+    int new_index = buf_len - 1;
 
-    for (size_t old_index = true_len - 1; old_index >= 0; --old_index) {
+    for (int old_index = true_len - 1; old_index >= 0; --old_index) {
         assert(new_index >= old_index);
         if (str[old_index] == ' ') {
             str[new_index] = '0';
@@ -124,12 +124,12 @@ void test_urlify() {
     const char *input = "Mr John Smith";
     const char *expected_output = "Mr\%20John\%20Smith";
 
-    size_t bufsize = strlen(expected_output);
+    size_t bufsize = strlen(expected_output) + 1;
     char *input_buf = new char[bufsize];
     strcpy(input_buf, input);
     assert(!strcmp(input, input_buf));
 
-    urlify(input_buf, bufsize, strlen(input));
+    urlify(input_buf, bufsize, strlen(input) + 1);
 
     assert(!strcmp(input_buf, expected_output));
 }
