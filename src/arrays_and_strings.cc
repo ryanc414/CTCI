@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <map>
 
 bool is_unique(const std::string &input);
@@ -20,12 +21,14 @@ bool is_palindrome_permutation(const std::string &str);
 bool is_one_away(const std::string &str_a, const std::string &str_b);
 bool is_one_replace_away(const std::string &str_a, const std::string &str_b);
 bool is_one_insert_away(const std::string &str_a, const std::string &str_b);
+std::string compress_string(const std::string &input);
 
 void test_is_unique();
 void test_is_permutation();
 void test_urlify();
 void test_palindrome_permutation();
 void test_one_away();
+void test_compress_string();
 
 /* Check if a string has all unique characters. */
 bool is_unique(const std::string &input) {
@@ -202,6 +205,38 @@ bool is_one_insert_away(const std::string &str_a, const std::string &str_b) {
     return true;
 }
 
+/* Perform basic string compression using the counts of repeated characters. */
+std::string compress_string(const std::string &input) {
+    std::ostringstream out_ss;
+    size_t input_len = input.length();
+    char curr_char = '\0';
+    size_t char_count = 0;
+
+    for (char c : input) {
+        if (c == curr_char) {
+            ++char_count;
+        } else {
+            if (char_count > 0) {
+                out_ss << curr_char << char_count;
+            }
+            // Could check string length here...
+            curr_char = c;
+            char_count = 1;
+        }
+    }
+
+    if (char_count > 0) {
+        out_ss << curr_char << char_count;
+    }
+
+    std::string out_str = out_ss.str();
+    if (out_str.length() > input_len) {
+        return input;
+    } else {
+        return out_str;
+    }
+}
+
 /**
  * TESTS
  */
@@ -257,6 +292,14 @@ void test_one_away() {
     assert(is_one_away("", ""));
 }
 
+/* Test the compress_string function. */
+void test_compress_string() {
+    auto str = compress_string("aabcccccaaa");
+    assert(str == "a2b1c5a3");
+    assert(compress_string("abcdefgh") == "abcdefgh");
+    assert(compress_string("") == "");
+}
+
 /* Test all functions. */
 int main() {
     test_is_unique();
@@ -264,6 +307,7 @@ int main() {
     test_urlify();
     test_palindrome_permutation();
     test_one_away();
+    test_compress_string();
 
     std::cout << "All assertions passed." << std::endl;
 
