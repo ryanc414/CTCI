@@ -1,6 +1,7 @@
 package ctci
 
 import "testing"
+import "bytes"
 
 // Test the IsUnique function.
 func TestIsUnique(t *testing.T) {
@@ -25,5 +26,20 @@ func TestIsPermutation(t *testing.T) {
 	}
 	if !IsPermutation("", "") {
 		t.Error()
+	}
+}
+
+// Test the Urlify function.
+func TestUrlify(t *testing.T) {
+	input := "Mr John Smith"
+	expected := []byte("Mr%20John%20Smith")
+
+	str := make([]byte, len(input), len(input)+4)
+	copy(str, input)
+
+	newSlice := Urlify(str)
+
+	if !bytes.Equal(newSlice, expected) {
+		t.Errorf("Expected %v, got %v", expected, str)
 	}
 }
