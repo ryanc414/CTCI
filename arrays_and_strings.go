@@ -1,5 +1,10 @@
 package ctci
 
+import (
+	"fmt"
+	"strings"
+)
+
 const AsciiLetterCount = 128
 const NumLetters = 26
 
@@ -162,4 +167,34 @@ func oneInsertAway(strA string, strB string) bool {
 	}
 
 	return true
+}
+
+// Perform basic string compression using counts of repeated chars.
+func CompressStr(input string) string {
+	var b strings.Builder
+	var currChar rune
+	currCount := 0
+
+	for _, c := range input {
+		if c == currChar {
+			currCount++
+		} else {
+			if currCount > 0 {
+				fmt.Fprintf(&b, "%s%d", string(currChar), currCount)
+			}
+			currChar = c
+			currCount = 1
+		}
+	}
+
+	if currCount > 0 {
+		fmt.Fprintf(&b, "%s%d", string(currChar), currCount)
+	}
+
+	compressedStr := b.String()
+	if len(compressedStr) > len(input) {
+		return input
+	} else {
+		return compressedStr
+	}
 }

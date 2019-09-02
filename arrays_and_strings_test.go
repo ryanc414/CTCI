@@ -75,3 +75,16 @@ func TestIsOneAway(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the CompressStr function.
+func TestCompressStr(t *testing.T) {
+	if CompressStr("aabcccccaaa") != "a2b1c5a3" {
+		t.Error()
+	}
+	if CompressStr("abcdefgh") != "abcdefgh" {
+		t.Error()
+	}
+	if CompressStr("") != "" {
+		t.Error()
+	}
+}
