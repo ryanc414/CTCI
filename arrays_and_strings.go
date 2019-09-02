@@ -107,3 +107,59 @@ func maxOneOdd(letterFreqs []int) bool {
 
 	return true
 }
+
+// Check if two strings are at most one edit away. An edit may be inserting,
+// removing or swapping a single char.
+func IsOneAway(strA string, strB string) bool {
+	lenDiff := len(strA) - len(strB)
+
+	switch lenDiff {
+	case 0:
+		return oneSwapAway(strA, strB)
+
+	case 1:
+		return oneInsertAway(strA, strB)
+
+	case -1:
+		return oneInsertAway(strB, strA)
+
+	default:
+		return false
+	}
+}
+
+// Check if two strings of the same length are at most one swap away.
+func oneSwapAway(strA string, strB string) bool {
+	swapFound := false
+
+	for i := range strA {
+		if strA[i] != strB[i] {
+			if swapFound {
+				return false
+			}
+			swapFound = true
+		}
+	}
+
+	return true
+}
+
+// Check if two strings are at most one insert away.
+func oneInsertAway(strA string, strB string) bool {
+	insertFound := false
+	aIndex := 0
+
+	for bIndex := range strB {
+		if strA[aIndex] != strB[bIndex] {
+			if insertFound {
+				return false
+			}
+			insertFound = true
+			aIndex += 2
+		} else {
+			aIndex++
+		}
+	}
+
+	return true
+}

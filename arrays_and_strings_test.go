@@ -56,3 +56,22 @@ func TestIsPalindromePerm(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the IsOneAway function.
+func TestIsOneAway(t *testing.T) {
+	if !IsOneAway("pale", "ple") {
+		t.Error()
+	}
+	if !IsOneAway("pales", "pale") {
+		t.Error()
+	}
+	if !IsOneAway("pale", "bale") {
+		t.Error()
+	}
+	if IsOneAway("pale", "bake") {
+		t.Error()
+	}
+	if !IsOneAway("", "") {
+		t.Error()
+	}
+}
