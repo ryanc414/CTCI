@@ -1,6 +1,7 @@
 package ctci
 
 const AsciiLetterCount = 128
+const NumLetters = 26
 
 // Determine if a string has all unique chars.
 func IsUnique(input string) bool {
@@ -65,4 +66,44 @@ func countChar(str []byte, char byte) int {
 		}
 	}
 	return count
+}
+
+// Check if a word is a permutation of a palindrome
+func IsPalindromePerm(word string) bool {
+	letterFreqs := countLetterFreqs(word)
+	return maxOneOdd(letterFreqs)
+}
+
+// Count the frequency of letters in a word. Casing is ignored (A and a are
+// equivalent) and non-letter characters e.g. punctuation is ignored (not
+// included in any count)
+func countLetterFreqs(word string) []int {
+	var letterFreqs [NumLetters]int
+
+	for _, c := range word {
+		if (int(c) >= int('a')) && (int(c) <= int('z')) {
+			letterFreqs[int(c)-int('a')]++
+		} else if (int(c) >= int('A')) && (int(c) <= int('Z')) {
+			letterFreqs[int(c)-int('A')]++
+		}
+		// Other characters are ignored.
+	}
+
+	return letterFreqs[:]
+}
+
+// Check if a slice contains at most one odd value.
+func maxOneOdd(letterFreqs []int) bool {
+	oddFound := false
+
+	for _, freq := range letterFreqs {
+		if freq%2 == 1 {
+			if oddFound {
+				return false
+			}
+			oddFound = true
+		}
+	}
+
+	return true
 }

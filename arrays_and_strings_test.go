@@ -43,3 +43,16 @@ func TestUrlify(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expected, str)
 	}
 }
+
+// Test the Palindrome Permutations function.
+func TestIsPalindromePerm(t *testing.T) {
+	if !IsPalindromePerm("Tact Coa") {
+		t.Error()
+	}
+	if IsPalindromePerm("Tact Coat") {
+		t.Error()
+	}
+	if !IsPalindromePerm("") {
+		t.Error()
+	}
+}
