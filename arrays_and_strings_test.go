@@ -122,3 +122,37 @@ func TestRotateMatrix(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the ZeroMatrix function.
+func TestZeroMatrix(t *testing.T) {
+	matrix := [][]int{
+		[]int{1, 2, 3, 4, 5},
+		[]int{6, 0, 7, 8, 9},
+		[]int{10, 11, 12, 13, 14},
+		[]int{15, 16, 17, 18, 0},
+	}
+
+	expected := [][]int{
+		[]int{1, 0, 3, 4, 0},
+		[]int{0, 0, 0, 0, 0},
+		[]int{10, 0, 12, 13, 0},
+		[]int{0, 0, 0, 0, 0},
+	}
+
+	ZeroMatrix(matrix)
+	t.Log(matrix)
+
+	for i := range matrix {
+		for j := range matrix[i] {
+			if matrix[i][j] != expected[i][j] {
+				t.Error()
+			}
+		}
+	}
+
+	var emptyMatrix [][]int
+	ZeroMatrix(emptyMatrix)
+	if len(emptyMatrix) != 0 {
+		t.Error()
+	}
+}

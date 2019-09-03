@@ -230,3 +230,31 @@ func rotateSubshell(matrix [][]int, shellIx int) {
 		matrix[i][last] = top
 	}
 }
+
+// For any element in an MxN matrix that is 0, set its entire row and column
+// to 0.
+func ZeroMatrix(matrix [][]int) {
+	var zeroRows []int
+	var zeroCols []int
+
+	for i := range matrix {
+		for j := range matrix[i] {
+			if matrix[i][j] == 0 {
+				zeroRows = append(zeroRows, i)
+				zeroCols = append(zeroCols, j)
+			}
+		}
+	}
+
+	for _, rowIx := range zeroRows {
+		for i := range matrix[rowIx] {
+			matrix[rowIx][i] = 0
+		}
+	}
+
+	for _, colIx := range zeroCols {
+		for i := range matrix {
+			matrix[i][colIx] = 0
+		}
+	}
+}
