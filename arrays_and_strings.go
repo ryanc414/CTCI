@@ -211,29 +211,22 @@ func RotateMatrix(matrix [][]int) {
 
 // Rotate a specific subshell within a matrix 90 degrees clockwise.
 func rotateSubshell(matrix [][]int, shellIx int) {
-	fullSize := len(matrix)
-	tmp := make([]int, fullSize-(shellIx*2))
+	last := len(matrix) - 1 - shellIx
 
-	// copy top to tmp
-	copy(tmp, matrix[shellIx][shellIx:fullSize-shellIx])
+	for i := shellIx; i < last; i++ {
+		offset := i - shellIx
+		top := matrix[shellIx][i]
 
-	// copy left to top
-	for i := range tmp {
-		matrix[shellIx][fullSize-shellIx-1-i] = matrix[shellIx+i][shellIx]
-	}
+		// left -> top
+		matrix[shellIx][i] = matrix[last-offset][shellIx]
 
-	// copy bottom to left
-	for i := range tmp {
-		matrix[shellIx+i][shellIx] = matrix[fullSize-shellIx-1][shellIx+i]
-	}
+		// bottom -> left
+		matrix[last-offset][shellIx] = matrix[last][last-offset]
 
-	// copy right to bottom
-	for i := range tmp {
-		matrix[fullSize-shellIx-1][shellIx+i] = matrix[fullSize-shellIx-1-i][fullSize-shellIx-1]
-	}
+		// right -> bottom
+		matrix[last][last-offset] = matrix[i][last]
 
-	// copy stored tmp to right
-	for i := range tmp {
-		matrix[shellIx+i][fullSize-shellIx-1] = tmp[i]
+		// top -> right
+		matrix[i][last] = top
 	}
 }
