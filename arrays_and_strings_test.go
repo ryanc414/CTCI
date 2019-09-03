@@ -88,3 +88,37 @@ func TestCompressStr(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the RotateMatrix function.
+func TestRotateMatrix(t *testing.T) {
+	matrix := [][]int{
+		[]int{1, 2, 3, 4},
+		[]int{5, 6, 7, 8},
+		[]int{9, 10, 11, 12},
+		[]int{13, 14, 15, 16},
+	}
+
+	expected := [][]int{
+		[]int{13, 9, 5, 1},
+		[]int{14, 10, 6, 2},
+		[]int{15, 11, 7, 3},
+		[]int{16, 12, 8, 4},
+	}
+
+	RotateMatrix(matrix)
+	t.Log(matrix)
+
+	for i := range matrix {
+		for j := range matrix[i] {
+			if matrix[i][j] != expected[i][j] {
+				t.Error()
+			}
+		}
+	}
+
+	var emptyMatrix [][]int
+	RotateMatrix(emptyMatrix)
+	if len(emptyMatrix) != 0 {
+		t.Error()
+	}
+}

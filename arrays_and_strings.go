@@ -198,3 +198,42 @@ func CompressStr(input string) string {
 		return compressedStr
 	}
 }
+
+// Rotates an input matrix in-place by 90 degrees clockwise.
+func RotateMatrix(matrix [][]int) {
+	size := len(matrix)
+	numShells := int(size / 2)
+
+	for i := 0; i < numShells; i++ {
+		rotateSubshell(matrix, i)
+	}
+}
+
+// Rotate a specific subshell within a matrix 90 degrees clockwise.
+func rotateSubshell(matrix [][]int, shellIx int) {
+	fullSize := len(matrix)
+	tmp := make([]int, fullSize-(shellIx*2))
+
+	// copy top to tmp
+	copy(tmp, matrix[shellIx][shellIx:fullSize-shellIx])
+
+	// copy left to top
+	for i := range tmp {
+		matrix[shellIx][fullSize-shellIx-1-i] = matrix[shellIx+i][shellIx]
+	}
+
+	// copy bottom to left
+	for i := range tmp {
+		matrix[shellIx+i][shellIx] = matrix[fullSize-shellIx-1][shellIx+i]
+	}
+
+	// copy right to bottom
+	for i := range tmp {
+		matrix[fullSize-shellIx-1][shellIx+i] = matrix[fullSize-shellIx-1-i][fullSize-shellIx-1]
+	}
+
+	// copy stored tmp to right
+	for i := range tmp {
+		matrix[shellIx+i][fullSize-shellIx-1] = tmp[i]
+	}
+}
