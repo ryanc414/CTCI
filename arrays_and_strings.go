@@ -258,3 +258,18 @@ func ZeroMatrix(matrix [][]int) {
 		}
 	}
 }
+
+// Check if string s2 is a rotation of s1, making only one call to isSubstring.
+func IsRotation(s1, s2 string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+
+	concatStr := s2 + s2
+	return isSubstring(concatStr, s1)
+}
+
+// Check if string s contains a given substring.
+func isSubstring(s, substr string) bool {
+	return strings.Contains(s, substr)
+}

@@ -156,3 +156,19 @@ func TestZeroMatrix(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the IsRotation function.
+func TestIsRotation(t *testing.T) {
+	if !IsRotation("waterbottle", "erbottlewat") {
+		t.Error()
+	}
+	if IsRotation("waterbottle", "erbottlewar") {
+		t.Error()
+	}
+	if IsRotation("waterbottle", "water") {
+		t.Error()
+	}
+	if !IsRotation("", "") {
+		t.Error()
+	}
+}
