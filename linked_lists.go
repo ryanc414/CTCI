@@ -124,3 +124,26 @@ func (node *Node) DeleteMiddle() {
 	node.data = node.next.data
 	node.next = node.next.next
 }
+
+// Partition a list around a value x, such that all nodes with values less
+// than x come before all nodes with values greater than or equal to x.
+func (listHead *Node) Partition(x int) *Node {
+	if listHead == nil {
+		return listHead
+	}
+
+	currNode := listHead
+	for currNode.next != nil {
+		if currNode.next.data < x {
+			// Delete the next node from the list and insert before the front.
+			insertNode := currNode.next
+			currNode.next = insertNode.next
+			insertNode.next = listHead
+			listHead = insertNode
+		} else {
+			currNode = currNode.next
+		}
+	}
+
+	return listHead
+}

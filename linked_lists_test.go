@@ -159,3 +159,44 @@ func TestDeleteMiddle(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the Partition function.
+func TestPartition(t *testing.T) {
+	list := Node{
+		data: 3, next: &Node{
+			data: 5, next: &Node{
+				data: 8, next: &Node{
+					data: 5, next: &Node{
+						data: 10, next: &Node{
+							data: 2, next: &Node{
+								data: 1, next: nil,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	newHead := list.Partition(5)
+
+	expected := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: &Node{
+					data: 5, next: &Node{
+						data: 8, next: &Node{
+							data: 5, next: &Node{
+								data: 10, next: nil,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if !newHead.Equals(&expected) {
+		t.Error()
+	}
+}
