@@ -147,3 +147,47 @@ func (listHead *Node) Partition(x int) *Node {
 
 	return listHead
 }
+
+// Add two integers represented by a list of digits in reverse order.
+func (list *Node) SumLists(other *Node) *Node {
+	return sumListRecur(list, other, 0)
+}
+
+// Recursive implementation.
+func sumListRecur(list *Node, other *Node, carry int) *Node {
+	if list == nil && other == nil {
+		if carry > 0 {
+			return &Node{data: carry, next: nil}
+		} else {
+			return nil
+		}
+	}
+
+	var nextValue int
+	var nextList *Node
+	var nextOther *Node
+	if list == nil {
+		nextValue = other.data + carry
+		nextList = nil
+		nextOther = other.next
+	} else if other == nil {
+		nextValue = list.data + carry
+		nextList = list.next
+		nextOther = nil
+	} else {
+		nextValue = list.data + other.data + carry
+		nextList = list.next
+		nextOther = other.next
+	}
+
+	var nextCarry int
+	if nextValue > 9 {
+		nextValue -= 10
+		nextCarry = 1
+	}
+
+	return &Node{
+		data: nextValue,
+		next: sumListRecur(nextList, nextOther, nextCarry),
+	}
+}

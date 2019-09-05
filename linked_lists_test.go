@@ -196,7 +196,45 @@ func TestPartition(t *testing.T) {
 		},
 	}
 
+    t.Log(newHead.String())
 	if !newHead.Equals(&expected) {
+		t.Error()
+	}
+}
+
+// Test the SumLists function.
+func TestSumLists(t *testing.T) {
+	listA := Node{
+		data: 7, next: &Node{
+			data: 1, next: &Node{
+				data: 6, next: nil,
+			},
+		},
+	}
+	listB := Node{
+		data: 5, next: &Node{
+			data: 9, next: &Node{
+				data: 2, next: nil,
+			},
+		},
+	}
+	expectedSum := Node{
+		data: 2, next: &Node{
+			data: 1, next: &Node{
+				data: 9, next: nil,
+			},
+		},
+	}
+
+	sum := listA.SumLists(&listB)
+
+    t.Log(sum.String())
+	if !sum.Equals(&expectedSum) {
+		t.Error()
+	}
+
+	var empty *Node
+	if empty.SumLists(nil) != nil {
 		t.Error()
 	}
 }
