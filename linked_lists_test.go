@@ -27,7 +27,7 @@ func TestRemoveDups(t *testing.T) {
 	}
 
 	list.RemoveDups()
-    t.Log(list.String())
+	t.Log(list.String())
 
 	listNode := &list
 	expectedNode := &expected
@@ -43,11 +43,11 @@ func TestRemoveDups(t *testing.T) {
 		t.Error()
 	}
 
-    var empty *Node
-    empty.RemoveDups()
-    if empty != nil {
-        t.Error()
-    }
+	var empty *Node
+	empty.RemoveDups()
+	if empty != nil {
+		t.Error()
+	}
 }
 
 // Test the RemoveDupsNoBuf method.
@@ -75,7 +75,7 @@ func TestRemoveDupsNoBuf(t *testing.T) {
 	}
 
 	list.RemoveDupsNoBuf()
-    t.Log(list.String())
+	t.Log(list.String())
 
 	listNode := &list
 	expectedNode := &expected
@@ -91,9 +91,47 @@ func TestRemoveDupsNoBuf(t *testing.T) {
 		t.Error()
 	}
 
-    var empty *Node
-    empty.RemoveDupsNoBuf()
-    if empty != nil {
-        t.Error()
-    }
+	var empty *Node
+	empty.RemoveDupsNoBuf()
+	if empty != nil {
+		t.Error()
+	}
+}
+
+// Test the KthToLast function.
+func TestKthToLast(t *testing.T) {
+	list := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: &Node{
+					data: 4, next: &Node{
+						data: 5, next: &Node{
+							data: 6, next: nil,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if list.KthToLast(0).data != 6 {
+		t.Error()
+	}
+
+	if list.KthToLast(3).data != 3 {
+		t.Error()
+	}
+
+	if list.KthToLast(5).data != 1 {
+		t.Error()
+	}
+
+	if list.KthToLast(6) != nil {
+		t.Error()
+	}
+
+	var empty *Node
+	if empty.KthToLast(0) != nil {
+		t.Error()
+	}
 }
