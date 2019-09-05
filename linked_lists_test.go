@@ -29,17 +29,7 @@ func TestRemoveDups(t *testing.T) {
 	list.RemoveDups()
 	t.Log(list.String())
 
-	listNode := &list
-	expectedNode := &expected
-	for listNode != nil && expectedNode != nil {
-		if listNode.data != expectedNode.data {
-			t.Error()
-		}
-		listNode = listNode.next
-		expectedNode = expectedNode.next
-	}
-
-	if listNode != nil || expectedNode != nil {
+	if !list.Equals(&expected) {
 		t.Error()
 	}
 
@@ -132,6 +122,40 @@ func TestKthToLast(t *testing.T) {
 
 	var empty *Node
 	if empty.KthToLast(0) != nil {
+		t.Error()
+	}
+}
+
+// Test the DeleteMiddle function.
+func TestDeleteMiddle(t *testing.T) {
+	list := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: &Node{
+					data: 4, next: &Node{
+						data: 5, next: &Node{
+							data: 6, next: nil,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	list.next.next.DeleteMiddle()      // deletes 3
+	list.next.next.next.DeleteMiddle() // deletes 5
+
+	expected := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 4, next: &Node{
+					data: 6, next: nil,
+				},
+			},
+		},
+	}
+
+	if !list.Equals(&expected) {
 		t.Error()
 	}
 }

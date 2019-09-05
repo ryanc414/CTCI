@@ -69,6 +69,21 @@ func (list *Node) String() string {
 	return b.String()
 }
 
+// Compare two lists.
+func (list *Node) Equals(other *Node) bool {
+	listNode := list
+	otherNode := other
+	for listNode != nil && otherNode != nil {
+		if listNode.data != otherNode.data {
+			return false
+		}
+		listNode = listNode.next
+		otherNode = otherNode.next
+	}
+
+	return listNode == nil && otherNode == nil
+}
+
 // Return the Kth-to-last element in a singly linked list.
 func (list *Node) KthToLast(k int) *Node {
 	_, foundNode := list.kthToLastRecur(k)
@@ -95,4 +110,17 @@ func (node *Node) kthToLastRecur(k int) (int, *Node) {
 	}
 
 	return tailCount + 1, nil
+}
+
+// Delete a node from the middle of a singly linked list - i.e. any node
+// apart from the first or last.
+func (node *Node) DeleteMiddle() {
+	if node == nil || node.next == nil {
+		panic("Node is not in the middle of a list.")
+	}
+
+	// Update this node to match the next one's value and next pointer. The
+	// next node will be GC'd so we don't need to explicitly deallocate it.
+	node.data = node.next.data
+	node.next = node.next.next
 }
