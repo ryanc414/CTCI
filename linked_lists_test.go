@@ -196,7 +196,7 @@ func TestPartition(t *testing.T) {
 		},
 	}
 
-    t.Log(newHead.String())
+	t.Log(newHead.String())
 	if !newHead.Equals(&expected) {
 		t.Error()
 	}
@@ -204,6 +204,7 @@ func TestPartition(t *testing.T) {
 
 // Test the SumLists function.
 func TestSumLists(t *testing.T) {
+	// Try summing two lists of equal length.
 	listA := Node{
 		data: 7, next: &Node{
 			data: 1, next: &Node{
@@ -228,13 +229,41 @@ func TestSumLists(t *testing.T) {
 
 	sum := listA.SumLists(&listB)
 
-    t.Log(sum.String())
+	t.Log(sum.String())
 	if !sum.Equals(&expectedSum) {
 		t.Error()
 	}
 
+	// Try summing an empty list.
 	var empty *Node
 	if empty.SumLists(nil) != nil {
+		t.Error()
+	}
+
+	// Try summing two lists of different lengths.
+	listC := Node{
+		data: 2, next: &Node{
+			data: 9, next: &Node{
+				data: 3, next: &Node{
+					data: 8, next: nil,
+				},
+			},
+		},
+	}
+	expectedSum = Node{
+		data: 9, next: &Node{
+			data: 0, next: &Node{
+				data: 0, next: &Node{
+					data: 9, next: nil,
+				},
+			},
+		},
+	}
+
+	sum = listA.SumLists(&listC)
+
+	t.Log(sum.String())
+	if !sum.Equals(&expectedSum) {
 		t.Error()
 	}
 }
