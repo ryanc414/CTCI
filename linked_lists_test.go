@@ -267,3 +267,71 @@ func TestSumLists(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the SumListsForward function.
+func TestSumListsForward(t *testing.T) {
+	// Try summing two lists of equal length.
+	listA := Node{
+		data: 7, next: &Node{
+			data: 1, next: &Node{
+				data: 6, next: nil,
+			},
+		},
+	}
+	listB := Node{
+		data: 5, next: &Node{
+			data: 9, next: &Node{
+				data: 2, next: nil,
+			},
+		},
+	}
+	expectedSum := Node{
+		data: 1, next: &Node{
+			data: 3, next: &Node{
+				data: 0, next: &Node{
+					data: 8, next: nil,
+				},
+			},
+		},
+	}
+
+	sum := listA.SumListsForward(&listB)
+
+	t.Log(sum.String())
+	if !sum.Equals(&expectedSum) {
+		t.Error()
+	}
+
+	// Try summing an empty list.
+	var empty *Node
+	if empty.SumListsForward(nil) != nil {
+		t.Error()
+	}
+
+	// Try summing two lists of different lengths.
+	listC := Node{
+		data: 2, next: &Node{
+			data: 9, next: &Node{
+				data: 3, next: &Node{
+					data: 8, next: nil,
+				},
+			},
+		},
+	}
+	expectedSum = Node{
+		data: 3, next: &Node{
+			data: 6, next: &Node{
+				data: 5, next: &Node{
+					data: 4, next: nil,
+				},
+			},
+		},
+	}
+
+	sum = listA.SumListsForward(&listC)
+
+	t.Log(sum.String())
+	if !sum.Equals(&expectedSum) {
+		t.Error()
+	}
+}

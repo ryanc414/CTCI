@@ -154,7 +154,7 @@ func (list *Node) SumLists(other *Node) *Node {
 }
 
 // Recursive implementation.
-func sumListRecur(list *Node, other *Node, carry int) *Node {
+func sumListRecur(list, other *Node, carry int) *Node {
 	if list == nil && other == nil {
 		if carry > 0 {
 			return &Node{data: carry, next: nil}
@@ -190,4 +190,80 @@ func sumListRecur(list *Node, other *Node, carry int) *Node {
 		data: nextValue,
 		next: sumListRecur(nextList, nextOther, nextCarry),
 	}
+}
+
+// Add two integers represented by a list of digits in forward order.
+func (list *Node) SumListsForward(other *Node) *Node {
+	listLength := list.Length()
+	otherLength := other.Length()
+
+	if listLength > otherLength {
+		other = other.prePadZeros(listLength - otherLength)
+	} else if otherLength > listLength {
+		list = list.prePadZeros(otherLength - listLength)
+	}
+
+	// Debug check - TODO remove
+	if list.Length() != other.Length() {
+		panic("List lengths are not equal after zero-padding")
+	}
+
+	result, carry := sumListFwdRecur(list, other)
+
+	if carry > 0 {
+		return &Node{data: carry, next: result}
+	} else {
+		return result
+	}
+}
+
+// Return the length of a linked list, by iterating to the end.
+func (list *Node) Length() int {
+	length := 0
+	for currNode := list; currNode != nil; currNode = currNode.next {
+		length++
+	}
+
+	return length
+}
+
+// Pre-pad a list with a given number of nodes containing data of 0.
+func (list *Node) prePadZeros(numZeros int) *Node {
+	if numZeros < 0 {
+		panic("numZeros must be a positive integer")
+	}
+
+	for i := 0; i < numZeros; i++ {
+		list = &Node{data: 0, next: list}
+	}
+
+	return list
+}
+
+// Recursive implementation for summing two integers represented by lists
+// of digits in forward order. Both lists must be the same length to ensure
+// digits for the same power of 10 are processed together.
+func sumListFwdRecur(list, other *Node) (*Node, int) {
+	// Terminate recursion at end of both lists.
+	if list == nil && other == nil {
+		return nil, 0
+	}
+
+	// Debug check
+	if list == nil || other == nil {
+		panic("Reached end of one list before the other")
+	}
+
+	// Perform recursive step first to sum the tails of both lists.
+	tailSum, carry := sumListFwdRecur(list.next, other.next)
+
+	nextValue := list.data + other.data + carry
+	nextCarry := 0
+
+	if nextValue > 9 {
+		nextValue -= 10
+		nextCarry = 1
+	}
+
+	return &Node{data: nextValue, next: tailSum}, nextCarry
 }
