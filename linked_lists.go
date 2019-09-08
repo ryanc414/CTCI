@@ -295,15 +295,12 @@ func FindIntersection(listA, listB *Node) *Node {
 		}
 	}
 
-	return findIntersectionRecur(listA, listB)
-}
+    // Now iterate through both lists until we find an intersection point,
+    // or until both list pointers are nil.
+    for listA != listB {
+        listA = listA.next
+        listB = listB.next
+    }
 
-// Find the intersection point of two singly linked lists recursively. Both
-// lists must have the same length.
-func findIntersectionRecur(nodeA, nodeB *Node) *Node {
-	if nodeA == nodeB {
-		return nodeA
-	} else {
-		return findIntersectionRecur(nodeA.next, nodeB.next)
-	}
+    return listA
 }
