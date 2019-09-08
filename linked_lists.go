@@ -295,12 +295,28 @@ func FindIntersection(listA, listB *Node) *Node {
 		}
 	}
 
-    // Now iterate through both lists until we find an intersection point,
-    // or until both list pointers are nil.
-    for listA != listB {
-        listA = listA.next
-        listB = listB.next
-    }
+	// Now iterate through both lists until we find an intersection point,
+	// or until both list pointers are nil.
+	for listA != listB {
+		listA = listA.next
+		listB = listB.next
+	}
 
-    return listA
+	return listA
+}
+
+// If a loop exists in a list, find and return the node at the start of the
+// loop.
+func (list *Node) FindLoop() *Node {
+	visitedNodes := make(map[*Node]bool)
+
+	for currNode := list; currNode != nil; currNode = currNode.next {
+		if visitedNodes[currNode] {
+			return currNode
+		}
+		visitedNodes[currNode] = true
+	}
+
+	// No loop was found so return nil.
+	return nil
 }

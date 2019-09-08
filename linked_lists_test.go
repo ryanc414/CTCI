@@ -416,3 +416,42 @@ func TestFindIntersection(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the FindLoop() function.
+func TestFindLoop(t *testing.T) {
+	loop := &Node{
+		data: 3, next: &Node{
+			data: 4, next: &Node{
+				data: 5, next: nil,
+			},
+		},
+	}
+	loop.next.next.next = loop
+
+	hasLoop := &Node{
+		data: 1, next: &Node{
+			data: 2, next: loop,
+		},
+	}
+
+	if hasLoop.FindLoop() != loop {
+		t.Error()
+	}
+
+	noLoop := &Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: nil,
+			},
+		},
+	}
+
+	if noLoop.FindLoop() != nil {
+		t.Error()
+	}
+
+	var empty *Node
+	if empty.FindLoop() != nil {
+		t.Error()
+	}
+}
