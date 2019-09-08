@@ -335,3 +335,40 @@ func TestSumListsForward(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestIsPalindrome(t *testing.T) {
+	listA := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: &Node{
+					data: 2, next: &Node{
+						data: 1, next: nil,
+					},
+				},
+			},
+		},
+	}
+	listB := Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: &Node{
+					data: 2, next: &Node{
+						data: 2, next: nil,
+					},
+				},
+			},
+		},
+	}
+
+	var empty *Node
+
+	if !listA.IsPalindrome() {
+		t.Error()
+	}
+	if listB.IsPalindrome() {
+		t.Error()
+	}
+	if !empty.IsPalindrome() {
+		t.Error()
+	}
+}

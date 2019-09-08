@@ -267,3 +267,23 @@ func sumListFwdRecur(list, other *Node) (*Node, int) {
 
 	return &Node{data: nextValue, next: tailSum}, nextCarry
 }
+
+// Check if a singly-linked list is a palindrome: the same forwards or
+// backwards
+func (list *Node) IsPalindrome() bool {
+	_, isPalindrome := isPalindromeRecur(list, list)
+	return isPalindrome
+}
+
+func isPalindromeRecur(head, currNode *Node) (*Node, bool) {
+	if currNode == nil {
+		return head, true
+	}
+
+	mirrorNode, isPalindrome := isPalindromeRecur(head, currNode.next)
+	if !isPalindrome {
+		return nil, false
+	}
+
+	return mirrorNode.next, mirrorNode.data == currNode.data
+}
