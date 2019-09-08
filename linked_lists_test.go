@@ -336,6 +336,7 @@ func TestSumListsForward(t *testing.T) {
 	}
 }
 
+// Test the IsPalindrome function.
 func TestIsPalindrome(t *testing.T) {
 	listA := Node{
 		data: 1, next: &Node{
@@ -369,6 +370,49 @@ func TestIsPalindrome(t *testing.T) {
 		t.Error()
 	}
 	if !empty.IsPalindrome() {
+		t.Error()
+	}
+}
+
+// Test the FindIntersection function.
+func TestFindIntersection(t *testing.T) {
+	commonTail := &Node{
+		data: 4, next: &Node{
+			data: 5, next: &Node{
+				data: 6, next: nil,
+			},
+		},
+	}
+	listA := &Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: commonTail,
+			},
+		},
+	}
+	listB := &Node{
+		data: 6, next: &Node{
+			data: 5, next: commonTail,
+		},
+	}
+	listC := &Node{
+		data: 1, next: &Node{
+			data: 2, next: &Node{
+				data: 3, next: nil,
+			},
+		},
+	}
+
+	if FindIntersection(listA, listB) != listB.next.next {
+		t.Error()
+	}
+
+	if FindIntersection(listA, listC) != nil {
+		t.Error()
+	}
+
+	var empty *Node
+	if FindIntersection(listA, empty) != nil {
 		t.Error()
 	}
 }

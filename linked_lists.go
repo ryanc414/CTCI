@@ -203,11 +203,6 @@ func (list *Node) SumListsForward(other *Node) *Node {
 		list = list.prePadZeros(otherLength - listLength)
 	}
 
-	// Debug check - TODO remove
-	if list.Length() != other.Length() {
-		panic("List lengths are not equal after zero-padding")
-	}
-
 	result, carry := sumListFwdRecur(list, other)
 
 	if carry > 0 {
@@ -249,11 +244,6 @@ func sumListFwdRecur(list, other *Node) (*Node, int) {
 		return nil, 0
 	}
 
-	// Debug check
-	if list == nil || other == nil {
-		panic("Reached end of one list before the other")
-	}
-
 	// Perform recursive step first to sum the tails of both lists.
 	tailSum, carry := sumListFwdRecur(list.next, other.next)
 
@@ -286,4 +276,34 @@ func isPalindromeRecur(head, currNode *Node) (*Node, bool) {
 	}
 
 	return mirrorNode.next, mirrorNode.data == currNode.data
+}
+
+// Find the intersection point of two singly linked lists. If the lists do not
+// intersect, nil is returned.
+func FindIntersection(listA, listB *Node) *Node {
+	lengthA := listA.Length()
+	lengthB := listB.Length()
+
+	// Shorten the longer list so that both lists are the same length.
+	if lengthA > lengthB {
+		for i := 0; i < lengthA-lengthB; i++ {
+			listA = listA.next
+		}
+	} else if lengthB > lengthA {
+		for i := 0; i < lengthB-lengthA; i++ {
+			listB = listB.next
+		}
+	}
+
+	return findIntersectionRecur(listA, listB)
+}
+
+// Find the intersection point of two singly linked lists recursively. Both
+// lists must have the same length.
+func findIntersectionRecur(nodeA, nodeB *Node) *Node {
+	if nodeA == nodeB {
+		return nodeA
+	} else {
+		return findIntersectionRecur(nodeA.next, nodeB.next)
+	}
 }
