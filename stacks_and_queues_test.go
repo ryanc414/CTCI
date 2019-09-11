@@ -2,9 +2,9 @@ package ctci
 
 import "testing"
 
-// Test the threeStacks type and methods.
-func TestThreeStacks(t *testing.T) {
-	stacks := NewThreeStacks()
+// Test the multiStacks type and methods.
+func TestMultiStacks(t *testing.T) {
+	stacks := NewMultiStacks(3)
 
 	for i := 0; i < 3; i++ {
 		if !stacks.IsEmpty(i) {
