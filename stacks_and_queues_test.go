@@ -40,3 +40,52 @@ func TestMultiStacks(t *testing.T) {
 		}
 	}
 }
+
+// Test the minStacks type and methods.
+func TestMinStack(t *testing.T) {
+	var stack MinStack
+
+	if !stack.IsEmpty() {
+		t.Error()
+	}
+
+	_, err := stack.Pop()
+	if err == nil {
+		t.Error()
+	}
+
+	_, err = stack.Peek()
+	if err == nil {
+		t.Error()
+	}
+
+	stack.Push(3)
+	stack.Push(2)
+	stack.Push(1)
+
+	val, err := stack.Min()
+	if val != 1 || err != nil {
+		t.Error()
+	}
+
+	val, err = stack.Pop()
+	if val != 1 || err != nil {
+		t.Error()
+	}
+
+	val, err = stack.Min()
+	if val != 2 || err != nil {
+		t.Error()
+	}
+
+	stack.Push(0)
+	val, err = stack.Peek()
+	if val != 0 || err != nil {
+		t.Error()
+	}
+
+	val, err = stack.Min()
+	if val != 0 || err != nil {
+		t.Error()
+	}
+}
