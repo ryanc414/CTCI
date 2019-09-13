@@ -3,11 +3,11 @@ package ctci
 import "errors"
 
 // A generic stack must implement four methods: Pop, Push, Peek and IsEmpty.
-type interface IntStack {
-    Pop() (int, error)
-    Push(item int)
-    Peek() (int, error)
-    IsEmpty() bool
+type IntStack interface {
+	Pop() (int, error)
+	Push(item int)
+	Peek() (int, error)
+	IsEmpty() bool
 }
 
 // Stores three stacks interleaved in a single array.
@@ -164,4 +164,85 @@ func (stack MinStack) Min() (int, error) {
 		return 0, errors.New("Stack is empty")
 	}
 	return stack.top.min, nil
+}
+
+// A setOfStacks provides the interface of a single stack while actually
+// being composed of a dynamic number of stacks which are each of a fixed
+// size. Since the size of each internal stack is fixed, it is simplest
+// to implement using arrays.
+type setOfStacks struct {
+	stacks    [][]int // internal stacks implemented as arrays
+	stackSize int     // fixed size of each internal stack
+
+	// Indices that specify the current top stack and position within that top
+	// stack respecively. -1 is used as a special value for the topStack to
+	// indicate an empty stack.
+	topStack int
+	topIx    int
+}
+
+// Construct a new set of stacks. Note that no arrays are allocated yet -
+// the array backing the first internal stack will be allocated when the
+// first value is pushed.
+func NewSetOfStacks(stackSize int) setOfStacks {
+	return setOfStacks{
+		stacks:    nil,
+		stackSize: stackSize,
+		topStack:  -1,
+		topIx:     stackSize - 1,
+	}
+}
+
+// Pop an item from the stack. Returns an error if the stack is empty. If
+// the item popped was the last one in an internal stack, move the top indices
+// to point at the previous stack.
+func (stacks *setOfStacks) Pop() (int, error) {
+	if stacks.IsEmpty() {
+		return 0, errors.New("Stack is empty")
+	}
+
+	retVal := stacks.stacks[stacks.topStack][stacks.topIx]
+
+	if stacks.topIx > 0 {
+		stacks.topIx--
+	} else {
+		// Last item in an internal stack is being popped. Reduce the number
+		// of internal stacks by one.
+        stacks.stacks[stacks.topStack] = nil
+		stacks.stacks = stacks.stacks[:stacks.topStack]
+		stacks.topStack--
+        stacks.topIx = stacks.stackSize - 1
+	}
+
+	return retVal, nil
+}
+
+// Push an item onto the stack. If the current internal stack is full, allocate
+// a new one and update internal indices to point at the new top stack.
+func (stacks *setOfStacks) Push(item int) {
+	if stacks.topIx < stacks.stackSize-1 {
+		stacks.topIx++
+		stacks.stacks[stacks.topStack][stacks.topIx] = item
+	} else {
+		// Create a new internal stack.
+		newStack := make([]int, stacks.stackSize)
+		stacks.stacks = append(stacks.stacks, newStack)
+		stacks.topStack++
+		stacks.topIx = 0
+		newStack[0] = item
+	}
+}
+
+// Peek at the top value in the stack without removing it.
+func (stacks *setOfStacks) Peek() (int, error) {
+	if stacks.IsEmpty() {
+		return 0, errors.New("Stack is empty")
+	}
+
+	return stacks.stacks[stacks.topStack][stacks.topIx], nil
+}
+
+// Check if a stack is empty.
+func (stacks *setOfStacks) IsEmpty() bool {
+	return stacks.topStack == -1
 }

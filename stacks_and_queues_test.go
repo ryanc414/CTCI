@@ -44,18 +44,9 @@ func TestMultiStacks(t *testing.T) {
 // Test the minStacks type and methods.
 func TestMinStack(t *testing.T) {
 	var stack MinStack
+	genericStackTest(t, &stack)
 
 	if !stack.IsEmpty() {
-		t.Error()
-	}
-
-	_, err := stack.Pop()
-	if err == nil {
-		t.Error()
-	}
-
-	_, err = stack.Peek()
-	if err == nil {
 		t.Error()
 	}
 
@@ -86,6 +77,96 @@ func TestMinStack(t *testing.T) {
 
 	val, err = stack.Min()
 	if val != 0 || err != nil {
+		t.Error()
+	}
+}
+
+// Test the setOfStacks type and methods.
+func TestSetOfStacks(t *testing.T) {
+	stackSet := NewSetOfStacks(3)
+	genericStackTest(t, &stackSet)
+
+	if !stackSet.IsEmpty() {
+		t.Error()
+	}
+
+	// Push 3 values and peek at the top value. This will fill the first
+	// internal stack.
+	stackSet.Push(1)
+	stackSet.Push(2)
+	stackSet.Push(3)
+
+	val, err := stackSet.Peek()
+	if val != 3 || err != nil {
+		t.Error()
+	}
+
+	// Push another 3 values and peek again. This will fill the second internal
+	// stack.
+	stackSet.Push(4)
+	stackSet.Push(5)
+	stackSet.Push(6)
+
+	val, err = stackSet.Peek()
+	if val != 6 || err != nil {
+		t.Error()
+	}
+
+	// Pop all values.
+	for expectedVal := 6; expectedVal > 0; expectedVal-- {
+		val, err = stackSet.Pop()
+		if val != expectedVal || err != nil {
+			t.Error()
+		}
+	}
+
+	if !stackSet.IsEmpty() {
+		t.Error()
+	}
+}
+
+// Generic test for any type that implements the stack interface.
+func genericStackTest(t *testing.T, stack IntStack) {
+	if !stack.IsEmpty() {
+		t.Error()
+	}
+
+	_, err := stack.Pop()
+	if err == nil {
+		t.Error()
+	}
+
+	_, err = stack.Peek()
+	if err == nil {
+		t.Error()
+	}
+
+	stack.Push(1)
+	stack.Push(2)
+	stack.Push(3)
+
+	val, err := stack.Pop()
+	if val != 3 || err != nil {
+		t.Error()
+	}
+
+	val, err = stack.Peek()
+	if val != 2 || err != nil {
+		t.Error()
+	}
+
+	// Pop the rest of the values, so that we leave the stack empty.
+	val, err = stack.Pop()
+	if val != 2 || err != nil {
+		t.Error()
+	}
+
+	val, err = stack.Pop()
+	if val != 1 || err != nil {
+		t.Error()
+	}
+
+	if !stack.IsEmpty() {
 		t.Error()
 	}
 }
