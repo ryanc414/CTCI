@@ -185,7 +185,7 @@ func TestMyQueue(t *testing.T) {
 		t.Error()
 	}
 
-	_, err := queue.Pop()
+	_, err := queue.Remove()
 	if err == nil {
 		t.Error()
 	}
@@ -195,9 +195,9 @@ func TestMyQueue(t *testing.T) {
 		t.Error()
 	}
 
-	queue.Push(1)
-	queue.Push(2)
-	queue.Push(3)
+	queue.Add(1)
+	queue.Add(2)
+	queue.Add(3)
 	if queue.IsEmpty() {
 		t.Error()
 	}
@@ -211,7 +211,7 @@ func TestMyQueue(t *testing.T) {
 
 	// Check that the values are popped in order 1, 2, 3
 	for expected := 1; expected < 4; expected++ {
-		val, err = queue.Pop()
+		val, err = queue.Remove()
 		if val != expected || err != nil {
 			t.Error(val, err)
 		}
@@ -243,5 +243,91 @@ func TestSortStack(t *testing.T) {
 
 	if !stack.IsEmpty() {
 		t.Fail()
+	}
+}
+
+// Test the animalShelter type and methods.
+func TestAnimalShelter(t *testing.T) {
+	shelter := NewAnimalShelter()
+
+	// Try dequeuing animals from an empty shelter - an error should be
+	// returned.
+	_, err := shelter.DequeueAny()
+	if err == nil {
+		t.Error()
+	}
+
+	_, err = shelter.DequeueDog()
+	if err == nil {
+		t.Error()
+	}
+
+	_, err = shelter.DequeueCat()
+	if err == nil {
+		t.Error()
+	}
+
+	// Now try enqueing some animals.
+	err = shelter.Enqueue(Animal{
+		animalType: Cat,
+		name:       "Lottie",
+		age:        12,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = shelter.Enqueue(Animal{
+		animalType: Dog,
+		name:       "Spot",
+		age:        5,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = shelter.Enqueue(Animal{
+		animalType: Dog,
+		name:       "Lucy",
+		age:        2,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = shelter.Enqueue(Animal{
+		animalType: Cat,
+		name:       "Penny",
+		age:        11,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Let's try dequeuing them.
+	animal, err := shelter.DequeueAny()
+	if err != nil || animal.name != "Lottie" {
+		t.Error(animal, err)
+	}
+
+	animal, err = shelter.DequeueCat()
+	if err != nil || animal.name != "Penny" {
+		t.Error(animal, err)
+	}
+
+	animal, err = shelter.DequeueDog()
+	if err != nil || animal.name != "Spot" {
+		t.Error(animal, err)
+	}
+
+	animal, err = shelter.DequeueAny()
+	if err != nil || animal.name != "Lucy" {
+		t.Error(animal, err)
+	}
+
+	// Shelter is now empty.
+	_, err = shelter.DequeueAny()
+	if err == nil {
+		t.Error()
 	}
 }

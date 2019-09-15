@@ -12,11 +12,10 @@ type IntStack interface {
 
 // A generic queue must implement the same four methods as a stack. Only the
 // ordering of popped elements differs - queues are popped in LIFO order
-// while stacks are FIFO. For clarity, we define a separate interface
-// for queues so that it is clear which ordering is expected.
+// while stacks are FIFO.
 type IntQueue interface {
-	Pop() (int, error)
-	Push(item int)
+	Add(item int)
+	Remove() (int, error)
 	Peek() (int, error)
 	IsEmpty() bool
 }
@@ -313,8 +312,8 @@ func NewMyQueue() *myQueue {
 	return &myQueue{}
 }
 
-// Pop an item from the front of the queue.
-func (queue *myQueue) Pop() (int, error) {
+// Remove an item from the front of the queue.
+func (queue *myQueue) Remove() (int, error) {
 	if queue.IsEmpty() {
 		return 0, errors.New("Queue is empty")
 	}
@@ -329,8 +328,8 @@ func (queue *myQueue) Pop() (int, error) {
 	return queue.outStack.Pop()
 }
 
-// Push an item onto the back of the queue.
-func (queue *myQueue) Push(item int) {
+// Add an item onto the back of the queue.
+func (queue *myQueue) Add(item int) {
 	if !queue.outStack.IsEmpty() {
 		err := queue.emptyOutStack()
 		if err != nil {
@@ -440,4 +439,140 @@ func sortStackPass(inStack, outStack IntStack, reverse bool) bool {
 			outStack.Push(outStackTop)
 		}
 	}
+}
+
+// The animal shelter holds both dogs and cats. Animals may be enqueued any
+// time. There are three dequeue operations: DequeueCat/Dog returns the
+// Cat or Dog that has been in the shelter for longest, and DequeueAny
+// returns whichever animal has been in the shelter the longest regardless
+// of its type.
+type Animal struct {
+	animalType int
+	name       string
+	age        int
+	entrySeq   int64
+}
+
+type animalNode struct {
+	animal Animal
+	next   *animalNode
+}
+
+type animalQueue struct {
+	first *animalNode
+	last  *animalNode
+}
+
+type animalShelter struct {
+	dogQueue animalQueue
+	catQueue animalQueue
+	currSeq  int64
+}
+
+func NewAnimalShelter() *animalShelter {
+	return &animalShelter{}
+}
+
+const (
+	Dog int = iota
+	Cat
+)
+
+// Adds a new animal to the shelter.
+func (shelter *animalShelter) Enqueue(animal Animal) error {
+	animal.entrySeq = shelter.currSeq
+
+	switch animal.animalType {
+	case Dog:
+		shelter.dogQueue.Add(animal)
+		shelter.currSeq++
+		return nil
+
+	case Cat:
+		shelter.catQueue.Add(animal)
+		shelter.currSeq++
+		return nil
+
+	default:
+		return errors.New("Unexpected animal type")
+	}
+}
+
+// Dequeue the animal that has been in the shelter for longest - either a dog
+// or a cat.
+func (shelter *animalShelter) DequeueAny() (Animal, error) {
+	nextCat, catErr := shelter.catQueue.Peek()
+	nextDog, dogErr := shelter.dogQueue.Peek()
+
+	// If both queues returned errors that means the shelter is empty.
+	if catErr != nil && dogErr != nil {
+		return Animal{}, errors.New("No animals in shelter")
+	}
+
+	// If the cat queue is empty of the next cat has a higher sequence number
+	// than the next dog, we return the next dog.
+	if catErr != nil || nextCat.entrySeq > nextDog.entrySeq {
+		_, err := shelter.dogQueue.Remove()
+		if err != nil {
+			panic(err)
+		}
+		return nextDog, nil
+	}
+
+	// Otherwise, we return the next cat.
+	_, err := shelter.catQueue.Remove()
+	if err != nil {
+		panic(err)
+	}
+	return nextCat, nil
+}
+
+// Dequeue the next dog.
+func (shelter *animalShelter) DequeueDog() (Animal, error) {
+	return shelter.dogQueue.Remove()
+}
+
+// Dequeue the next cat.
+func (shelter *animalShelter) DequeueCat() (Animal, error) {
+	return shelter.catQueue.Remove()
+}
+
+// Add an animal to a queue.
+func (queue *animalQueue) Add(animal Animal) {
+	newNode := &animalNode{animal: animal}
+	if queue.last != nil {
+		queue.last.next = newNode
+	}
+	queue.last = newNode
+	if queue.first == nil {
+		queue.first = queue.last
+	}
+}
+
+// Remove an animal from a queue.
+func (queue *animalQueue) Remove() (Animal, error) {
+	if queue.IsEmpty() {
+		return Animal{}, errors.New("Queue is empty")
+	}
+
+	animal := queue.first.animal
+	queue.first = queue.first.next
+	if queue.first == nil {
+		queue.last = nil
+	}
+	return animal, nil
+}
+
+// Peek at the next element in the queue.
+func (queue animalQueue) Peek() (Animal, error) {
+	if queue.IsEmpty() {
+		return Animal{}, errors.New("Queue is empty")
+	}
+
+	return queue.first.animal, nil
+}
+
+// Check if the queue is empty.
+func (queue animalQueue) IsEmpty() bool {
+	return queue.first == nil
 }
