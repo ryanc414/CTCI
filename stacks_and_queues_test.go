@@ -206,19 +206,19 @@ func TestMyQueue(t *testing.T) {
 	// be 1.
 	val, err := queue.Peek()
 	if val != 1 || err != nil {
-		t.Error()
+		t.Error(val, err)
 	}
 
 	// Check that the values are popped in order 1, 2, 3
 	for expected := 1; expected < 4; expected++ {
 		val, err = queue.Pop()
 		if val != expected || err != nil {
-			t.Error()
+			t.Error(val, err)
 		}
 	}
 
 	// All values have been popped - queue should again be empty.
 	if !queue.IsEmpty() {
-		t.Error()
+		t.Error("Queue not empty")
 	}
 }

@@ -304,13 +304,13 @@ func (stacks *setOfStacks) IsEmpty() bool {
 // The MyQueue type implements the Queue interface but is actually implemented
 // using two stacks.
 type myQueue struct {
-	inStack  *basicStack
-	outStack *basicStack
+	inStack  basicStack
+	outStack basicStack
 }
 
 // Construct a new myQueue.
 func NewMyQueue() *myQueue {
-	return &myQueue{inStack: NewBasicStack(), outStack: NewBasicStack()}
+	return &myQueue{}
 }
 
 // Pop an item from the front of the queue.
@@ -320,7 +320,10 @@ func (queue *myQueue) Pop() (int, error) {
 	}
 
 	if !queue.inStack.IsEmpty() {
-		queue.emptyInStack()
+		err := queue.emptyInStack()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return queue.outStack.Pop()
@@ -329,20 +332,26 @@ func (queue *myQueue) Pop() (int, error) {
 // Push an item onto the back of the queue.
 func (queue *myQueue) Push(item int) {
 	if !queue.outStack.IsEmpty() {
-		queue.emptyOutStack()
+		err := queue.emptyOutStack()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	queue.inStack.Push(item)
 }
 
 // Peek at the front of the queue.
-func (queue myQueue) Peek() (int, error) {
+func (queue *myQueue) Peek() (int, error) {
 	if queue.IsEmpty() {
 		return 0, errors.New("Queue is empty")
 	}
 
 	if !queue.inStack.IsEmpty() {
-		queue.emptyInStack()
+		err := queue.emptyInStack()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return queue.outStack.Peek()
@@ -359,7 +368,7 @@ func (queue *myQueue) emptyInStack() error {
 		return errors.New("outStack is not empty")
 	}
 
-	for queue.inStack.IsEmpty() {
+	for !queue.inStack.IsEmpty() {
 		val, err := queue.inStack.Pop()
 		if err != nil {
 			return err
@@ -377,7 +386,7 @@ func (queue *myQueue) emptyOutStack() error {
 		return errors.New("inStack is not empty")
 	}
 
-	for queue.outStack.IsEmpty() {
+	for !queue.outStack.IsEmpty() {
 		val, err := queue.outStack.Pop()
 		if err != nil {
 			return err
