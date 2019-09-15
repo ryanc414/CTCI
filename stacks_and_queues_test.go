@@ -2,6 +2,12 @@ package ctci
 
 import "testing"
 
+// Test the BasicStack type and methods.
+func TestBasicStack(t *testing.T) {
+	stack := NewBasicStack()
+	genericStackTest(t, stack)
+}
+
 // Test the multiStacks type and methods.
 func TestMultiStacks(t *testing.T) {
 	stacks := NewMultiStacks(3)
@@ -167,6 +173,52 @@ func genericStackTest(t *testing.T, stack IntStack) {
 	}
 
 	if !stack.IsEmpty() {
+		t.Error()
+	}
+}
+
+// Test the MyQueue type and methods.
+func TestMyQueue(t *testing.T) {
+	queue := NewMyQueue()
+
+	if !queue.IsEmpty() {
+		t.Error()
+	}
+
+	_, err := queue.Pop()
+	if err == nil {
+		t.Error()
+	}
+
+	_, err = queue.Peek()
+	if err == nil {
+		t.Error()
+	}
+
+	queue.Push(1)
+	queue.Push(2)
+	queue.Push(3)
+	if queue.IsEmpty() {
+		t.Error()
+	}
+
+	// Since the queue has LIFO ordering, the first value to come out should
+	// be 1.
+	val, err := queue.Peek()
+	if val != 1 || err != nil {
+		t.Error()
+	}
+
+	// Check that the values are popped in order 1, 2, 3
+	for expected := 1; expected < 4; expected++ {
+		val, err = queue.Pop()
+		if val != expected || err != nil {
+			t.Error()
+		}
+	}
+
+	// All values have been popped - queue should again be empty.
+	if !queue.IsEmpty() {
 		t.Error()
 	}
 }

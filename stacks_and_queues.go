@@ -10,6 +10,60 @@ type IntStack interface {
 	IsEmpty() bool
 }
 
+// A generic queue must implement the same four methods as a stack. Only the
+// ordering of popped elements differs - queues are popped in LIFO order
+// while stacks are FIFO. For clarity, we define a separate interface
+// for queues so that it is clear which ordering is expected.
+type IntQueue interface {
+	Pop() (int, error)
+	Push(item int)
+	Peek() (int, error)
+	IsEmpty() bool
+}
+
+// Basic implementation of a stack, using a dynamic expanding array slice.
+type basicStack struct {
+	data []int
+}
+
+// Construct a new empty stack.
+func NewBasicStack() *basicStack {
+	return &basicStack{data: nil}
+}
+
+// Pop an element from the stack - pops last element from the slice.
+func (stack *basicStack) Pop() (int, error) {
+	if stack.IsEmpty() {
+		return 0, errors.New("Stack is empty")
+	}
+
+	newLen := len(stack.data) - 1
+	var popped int
+	popped, stack.data = stack.data[newLen], stack.data[:newLen]
+
+	return popped, nil
+}
+
+// Push an element onto the stack - item is appended to the slice.
+func (stack *basicStack) Push(item int) {
+	stack.data = append(stack.data, item)
+}
+
+// Peek at the top element in the stack.
+func (stack basicStack) Peek() (int, error) {
+	if stack.IsEmpty() {
+		return 0, errors.New("Stack is empty")
+	}
+
+	return stack.data[len(stack.data)-1], nil
+}
+
+// Check if the stack is empty, by checking if the data slice has a non-zero
+// length.
+func (stack basicStack) IsEmpty() bool {
+	return len(stack.data) == 0
+}
+
 // Stores three stacks interleaved in a single array.
 type multiStacks struct {
 	stackData    []int
@@ -208,10 +262,10 @@ func (stacks *setOfStacks) Pop() (int, error) {
 	} else {
 		// Last item in an internal stack is being popped. Reduce the number
 		// of internal stacks by one.
-        stacks.stacks[stacks.topStack] = nil
+		stacks.stacks[stacks.topStack] = nil
 		stacks.stacks = stacks.stacks[:stacks.topStack]
 		stacks.topStack--
-        stacks.topIx = stacks.stackSize - 1
+		stacks.topIx = stacks.stackSize - 1
 	}
 
 	return retVal, nil
@@ -245,4 +299,92 @@ func (stacks *setOfStacks) Peek() (int, error) {
 // Check if a stack is empty.
 func (stacks *setOfStacks) IsEmpty() bool {
 	return stacks.topStack == -1
+}
+
+// The MyQueue type implements the Queue interface but is actually implemented
+// using two stacks.
+type myQueue struct {
+	inStack  *basicStack
+	outStack *basicStack
+}
+
+// Construct a new myQueue.
+func NewMyQueue() *myQueue {
+	return &myQueue{inStack: NewBasicStack(), outStack: NewBasicStack()}
+}
+
+// Pop an item from the front of the queue.
+func (queue *myQueue) Pop() (int, error) {
+	if queue.IsEmpty() {
+		return 0, errors.New("Queue is empty")
+	}
+
+	if !queue.inStack.IsEmpty() {
+		queue.emptyInStack()
+	}
+
+	return queue.outStack.Pop()
+}
+
+// Push an item onto the back of the queue.
+func (queue *myQueue) Push(item int) {
+	if !queue.outStack.IsEmpty() {
+		queue.emptyOutStack()
+	}
+
+	queue.inStack.Push(item)
+}
+
+// Peek at the front of the queue.
+func (queue myQueue) Peek() (int, error) {
+	if queue.IsEmpty() {
+		return 0, errors.New("Queue is empty")
+	}
+
+	if !queue.inStack.IsEmpty() {
+		queue.emptyInStack()
+	}
+
+	return queue.outStack.Peek()
+}
+
+// Check if the queue is empty.
+func (queue myQueue) IsEmpty() bool {
+	return queue.inStack.IsEmpty() && queue.outStack.IsEmpty()
+}
+
+// Empty the inStack into the outStack.
+func (queue *myQueue) emptyInStack() error {
+	if !queue.outStack.IsEmpty() {
+		return errors.New("outStack is not empty")
+	}
+
+	for queue.inStack.IsEmpty() {
+		val, err := queue.inStack.Pop()
+		if err != nil {
+			return err
+		}
+
+		queue.outStack.Push(val)
+	}
+
+	return nil
+}
+
+// Empty the outStack into the inStack.
+func (queue *myQueue) emptyOutStack() error {
+	if !queue.inStack.IsEmpty() {
+		return errors.New("inStack is not empty")
+	}
+
+	for queue.outStack.IsEmpty() {
+		val, err := queue.outStack.Pop()
+		if err != nil {
+			return err
+		}
+
+		queue.inStack.Push(val)
+	}
+
+	return nil
 }
