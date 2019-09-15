@@ -402,16 +402,11 @@ func (queue *myQueue) emptyOutStack() error {
 // an additional temporary stack.
 func SortStack(stack IntStack) {
 	tmpStack := NewBasicStack()
-	isSorted = false
-
-	inStack := stack
-	outStack := tmpStack
-	reverse = false
+	isSorted := false
 
 	for !isSorted {
-		isSorted = sortStackPass(inStack, outStack, reverse)
-		inStack, outStack = outStack, inStack
-		reverse = !reverse
+		sortStackPass(stack, tmpStack, false)
+		isSorted = sortStackPass(tmpStack, stack, true)
 	}
 }
 
@@ -420,30 +415,29 @@ func SortStack(stack IntStack) {
 func sortStackPass(inStack, outStack IntStack, reverse bool) bool {
 	isSorted := true
 
+	var cmp func(x, y int) bool
 	if reverse {
-		cmp := func(x, y int) bool { return x >= y }
+		cmp = func(x, y int) bool { return x >= y }
 	} else {
-		cmp := func(x, y int) bool { return x <= y }
+		cmp = func(x, y int) bool { return x <= y }
 	}
 
 	for {
 		nextVal, err := inStack.Pop()
-		if err { // inStack is empty
-			return
+		if err != nil { // inStack is empty
+			return isSorted
 		}
 
-		outStackTop, err := tmpStack.Pop()
-		if err {
-			tmpStack.Push(nextVal)
+		outStackTop, err := outStack.Pop()
+		if err != nil {
+			outStack.Push(nextVal)
 		} else if cmp(outStackTop, nextVal) {
-			tmpStack.Push(outStackTop)
-			tmpStack.Push(nextVal)
+			outStack.Push(outStackTop)
+			outStack.Push(nextVal)
 		} else {
 			isSorted = false
-			tmpStack.Push(nextVal)
-			tmpStack.Push(outStackTop)
+			outStack.Push(nextVal)
+			outStack.Push(outStackTop)
 		}
 	}
-
-	return isSorted
 }
