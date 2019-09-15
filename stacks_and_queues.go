@@ -397,3 +397,53 @@ func (queue *myQueue) emptyOutStack() error {
 
 	return nil
 }
+
+// Sort a stack in-place so that the smallest elements are on top, using only
+// an additional temporary stack.
+func SortStack(stack IntStack) {
+	tmpStack := NewBasicStack()
+	isSorted = false
+
+	inStack := stack
+	outStack := tmpStack
+	reverse = false
+
+	for !isSorted {
+		isSorted = sortStackPass(inStack, outStack, reverse)
+		inStack, outStack = outStack, inStack
+		reverse = !reverse
+	}
+}
+
+// Make a single pass at sorting inStack into outStack. Adjacent out-of-order
+// elements are swapped.
+func sortStackPass(inStack, outStack IntStack, reverse bool) bool {
+	isSorted := true
+
+	if reverse {
+		cmp := func(x, y int) bool { return x >= y }
+	} else {
+		cmp := func(x, y int) bool { return x <= y }
+	}
+
+	for {
+		nextVal, err := inStack.Pop()
+		if err { // inStack is empty
+			return
+		}
+
+		outStackTop, err := tmpStack.Pop()
+		if err {
+			tmpStack.Push(nextVal)
+		} else if cmp(outStackTop, nextVal) {
+			tmpStack.Push(outStackTop)
+			tmpStack.Push(nextVal)
+		} else {
+			isSorted = false
+			tmpStack.Push(nextVal)
+			tmpStack.Push(outStackTop)
+		}
+	}
+
+	return isSorted
+}

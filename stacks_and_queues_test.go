@@ -222,3 +222,26 @@ func TestMyQueue(t *testing.T) {
 		t.Error("Queue not empty")
 	}
 }
+
+// Test the SortStack function.
+func TestSortStack(t *testing.T) {
+	stack := NewBasicStack()
+	stack.Push(2)
+	stack.Push(1)
+	stack.Push(4)
+	stack.Push(3)
+	stack.Push(5)
+
+	SortStack(stack)
+
+	for expected := 1; expected < 6; expected++ {
+		val, err := stack.Pop()
+		if val != expected || err != nil {
+			t.Error(val, err)
+		}
+	}
+
+	if !stack.IsEmpty() {
+		t.Fail()
+	}
+}
