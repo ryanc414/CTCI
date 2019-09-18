@@ -1,55 +1,58 @@
 package ctci
 
-import "errors"
+import (
+	"container/list"
+	"errors"
+)
 
 // A generic stack must implement four methods: Pop, Push, Peek and IsEmpty.
-type IntStack interface {
-	Pop() (int, error)
-	Push(item int)
-	Peek() (int, error)
+type Stack interface {
+	Pop() (interface{}, error)
+	Push(item interface{})
+	Peek() (interface{}, error)
 	IsEmpty() bool
 }
 
 // A generic queue must implement the same four methods as a stack. Only the
 // ordering of popped elements differs - queues are popped in LIFO order
 // while stacks are FIFO.
-type IntQueue interface {
-	Add(item int)
-	Remove() (int, error)
-	Peek() (int, error)
+type Queue interface {
+	Add(item interface{})
+	Remove() (interface{}, error)
+	Peek() (interface{}, error)
 	IsEmpty() bool
 }
 
 // Basic implementation of a stack, using a dynamic expanding array slice.
 type basicStack struct {
-	data []int
+	data []interface{}
 }
 
 // Construct a new empty stack.
 func NewBasicStack() *basicStack {
-	return &basicStack{data: nil}
+	return &basicStack{}
 }
 
 // Pop an element from the stack - pops last element from the slice.
-func (stack *basicStack) Pop() (int, error) {
+func (stack *basicStack) Pop() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
 
 	newLen := len(stack.data) - 1
-	var popped int
+	var popped interface{}
 	popped, stack.data = stack.data[newLen], stack.data[:newLen]
 
 	return popped, nil
 }
 
 // Push an element onto the stack - item is appended to the slice.
-func (stack *basicStack) Push(item int) {
+func (stack *basicStack) Push(item interface{}) {
 	stack.data = append(stack.data, item)
 }
 
 // Peek at the top element in the stack.
-func (stack basicStack) Peek() (int, error) {
+func (stack basicStack) Peek() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
@@ -61,6 +64,43 @@ func (stack basicStack) Peek() (int, error) {
 // length.
 func (stack basicStack) IsEmpty() bool {
 	return len(stack.data) == 0
+}
+
+// Implement a basic queue using a linked list.
+type BasicQueue struct {
+	list list.List
+}
+
+func NewBasicQueue() *BasicQueue {
+	return &BasicQueue{}
+}
+
+func (queue *BasicQueue) Add(item interface{}) {
+	queue.list.PushBack(item)
+}
+
+func (queue *BasicQueue) Remove() (interface{}, error) {
+	frontEl := queue.list.Front()
+	if frontEl == nil {
+		return nil, errors.New("Queue is empty")
+	}
+
+	retVal := frontEl.Value
+	queue.list.Remove(frontEl)
+	return retVal, nil
+}
+
+func (queue BasicQueue) Peek() (interface{}, error) {
+	frontEl := queue.list.Front()
+	if frontEl == nil {
+		return nil, errors.New("Queue is empty")
+	}
+
+	return frontEl.Value, nil
+}
+
+func (queue BasicQueue) IsEmpty() bool {
+	return queue.list.Front() == nil
 }
 
 // Stores three stacks interleaved in a single array.
@@ -166,7 +206,7 @@ type MinStack struct {
 	top *MinStackNode
 }
 
-func (stack *MinStack) Pop() (int, error) {
+func (stack *MinStack) Pop() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
@@ -177,16 +217,16 @@ func (stack *MinStack) Pop() (int, error) {
 	return retVal, nil
 }
 
-func (stack *MinStack) Push(item int) {
+func (stack *MinStack) Push(item interface{}) {
 	var newMin int
 	if stack.IsEmpty() {
-		newMin = item
+		newMin = item.(int)
 	} else {
-		newMin = min(item, stack.top.min)
+		newMin = min(item.(int), stack.top.min)
 	}
 
 	newNode := MinStackNode{
-		data: item,
+		data: item.(int),
 		next: stack.top,
 		min:  newMin,
 	}
@@ -201,7 +241,7 @@ func min(x, y int) int {
 	return y
 }
 
-func (stack MinStack) Peek() (int, error) {
+func (stack MinStack) Peek() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
@@ -224,8 +264,8 @@ func (stack MinStack) Min() (int, error) {
 // size. Since the size of each internal stack is fixed, it is simplest
 // to implement using arrays.
 type setOfStacks struct {
-	stacks    [][]int // internal stacks implemented as arrays
-	stackSize int     // fixed size of each internal stack
+	stacks    [][]interface{} // internal stacks implemented as arrays
+	stackSize int             // fixed size of each internal stack
 
 	// Indices that specify the current top stack and position within that top
 	// stack respecively. -1 is used as a special value for the topStack to
@@ -249,7 +289,7 @@ func NewSetOfStacks(stackSize int) setOfStacks {
 // Pop an item from the stack. Returns an error if the stack is empty. If
 // the item popped was the last one in an internal stack, move the top indices
 // to point at the previous stack.
-func (stacks *setOfStacks) Pop() (int, error) {
+func (stacks *setOfStacks) Pop() (interface{}, error) {
 	if stacks.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
@@ -272,13 +312,13 @@ func (stacks *setOfStacks) Pop() (int, error) {
 
 // Push an item onto the stack. If the current internal stack is full, allocate
 // a new one and update internal indices to point at the new top stack.
-func (stacks *setOfStacks) Push(item int) {
+func (stacks *setOfStacks) Push(item interface{}) {
 	if stacks.topIx < stacks.stackSize-1 {
 		stacks.topIx++
 		stacks.stacks[stacks.topStack][stacks.topIx] = item
 	} else {
 		// Create a new internal stack.
-		newStack := make([]int, stacks.stackSize)
+		newStack := make([]interface{}, stacks.stackSize)
 		stacks.stacks = append(stacks.stacks, newStack)
 		stacks.topStack++
 		stacks.topIx = 0
@@ -287,7 +327,7 @@ func (stacks *setOfStacks) Push(item int) {
 }
 
 // Peek at the top value in the stack without removing it.
-func (stacks *setOfStacks) Peek() (int, error) {
+func (stacks *setOfStacks) Peek() (interface{}, error) {
 	if stacks.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
@@ -313,7 +353,7 @@ func NewMyQueue() *myQueue {
 }
 
 // Remove an item from the front of the queue.
-func (queue *myQueue) Remove() (int, error) {
+func (queue *myQueue) Remove() (interface{}, error) {
 	if queue.IsEmpty() {
 		return 0, errors.New("Queue is empty")
 	}
@@ -329,7 +369,7 @@ func (queue *myQueue) Remove() (int, error) {
 }
 
 // Add an item onto the back of the queue.
-func (queue *myQueue) Add(item int) {
+func (queue *myQueue) Add(item interface{}) {
 	if !queue.outStack.IsEmpty() {
 		err := queue.emptyOutStack()
 		if err != nil {
@@ -341,7 +381,7 @@ func (queue *myQueue) Add(item int) {
 }
 
 // Peek at the front of the queue.
-func (queue *myQueue) Peek() (int, error) {
+func (queue *myQueue) Peek() (interface{}, error) {
 	if queue.IsEmpty() {
 		return 0, errors.New("Queue is empty")
 	}
@@ -399,7 +439,7 @@ func (queue *myQueue) emptyOutStack() error {
 
 // Sort a stack in-place so that the smallest elements are on top, using only
 // an additional temporary stack.
-func SortStack(stack IntStack) {
+func SortStack(stack Stack) {
 	tmpStack := NewBasicStack()
 	isSorted := false
 
@@ -411,7 +451,7 @@ func SortStack(stack IntStack) {
 
 // Make a single pass at sorting inStack into outStack. Adjacent out-of-order
 // elements are swapped.
-func sortStackPass(inStack, outStack IntStack, reverse bool) bool {
+func sortStackPass(inStack, outStack Stack, reverse bool) bool {
 	isSorted := true
 
 	var cmp func(x, y int) bool
@@ -430,7 +470,7 @@ func sortStackPass(inStack, outStack IntStack, reverse bool) bool {
 		outStackTop, err := outStack.Pop()
 		if err != nil {
 			outStack.Push(nextVal)
-		} else if cmp(outStackTop, nextVal) {
+		} else if cmp(outStackTop.(int), nextVal.(int)) {
 			outStack.Push(outStackTop)
 			outStack.Push(nextVal)
 		} else {

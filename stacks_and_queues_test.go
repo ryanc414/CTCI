@@ -60,12 +60,12 @@ func TestMinStack(t *testing.T) {
 	stack.Push(2)
 	stack.Push(1)
 
-	val, err := stack.Min()
-	if val != 1 || err != nil {
+	minVal, err := stack.Min()
+	if minVal != 1 || err != nil {
 		t.Error()
 	}
 
-	val, err = stack.Pop()
+	val, err := stack.Pop()
 	if val != 1 || err != nil {
 		t.Error()
 	}
@@ -132,7 +132,7 @@ func TestSetOfStacks(t *testing.T) {
 }
 
 // Generic test for any type that implements the stack interface.
-func genericStackTest(t *testing.T, stack IntStack) {
+func genericStackTest(t *testing.T, stack Stack) {
 	if !stack.IsEmpty() {
 		t.Error()
 	}
@@ -177,10 +177,20 @@ func genericStackTest(t *testing.T, stack IntStack) {
 	}
 }
 
+// Test the BasicQueue type and methods.
+func TestBasicQueue(t *testing.T) {
+	queue := NewBasicQueue()
+	genericQueueTest(t, queue)
+}
+
 // Test the MyQueue type and methods.
 func TestMyQueue(t *testing.T) {
 	queue := NewMyQueue()
+	genericQueueTest(t, queue)
+}
 
+// Test the queue interface.
+func genericQueueTest(t *testing.T, queue Queue) {
 	if !queue.IsEmpty() {
 		t.Error()
 	}
