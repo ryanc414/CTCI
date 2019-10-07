@@ -40,3 +40,26 @@ func (graph Graph) RouteExists(nodeS, nodeE *GraphNode) bool {
 
 	return false
 }
+
+// A node in a binary search tree.
+type BSTNode struct {
+	value int
+	left  *BSTNode
+	right *BSTNode
+}
+
+// Generates a binary search tree of minimal height from a sorted array of
+// unique integer elements.
+func GenerateBST(sortedArr []int) *BSTNode {
+	if len(sortedArr) == 0 {
+		return nil
+	}
+
+	midpoint := (len(sortedArr) / 2)
+
+	return &BSTNode{
+		value: sortedArr[midpoint],
+		left:  GenerateBST(sortedArr[:midpoint]),
+		right: GenerateBST(sortedArr[midpoint+1:]),
+	}
+}
