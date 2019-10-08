@@ -144,3 +144,48 @@ func checkBalancedRecur(node *BSTNode) (bool, int) {
 
 	return balanced, currHeight
 }
+
+// Validate if a binary tree is also a binary search tree. A BST node is valid
+// if its value is greater than any value in the left sub-tree and greater
+// than any value in the right sub-tree, and both left and right subtrees are
+// valid BSTs.
+func (tree BSTNode) ValidateBST() bool {
+	valid, _, _ := validateBSTRecur(&tree)
+	return valid
+}
+
+// Recursive step. For each node, as well as returning whether it is a valid
+// BST, we also return the min and max values contained in the subtree to be
+// able to validate the parent node. Note that the min and max values are only
+// correct for a valid BST - for an invalid BST we short-circuit early and
+// don't bother checking the rest of the tree.
+func validateBSTRecur(node *BSTNode) (bool, int, int) {
+	if node.left == nil && node.right == nil {
+		// A single node with no children is valid.
+		return true, node.value, node.value
+	} else if node.left == nil {
+		// Recurse down into the right subtree.
+		rightIsValid, rightMin, rightMax := validateBSTRecur(node.right)
+		isValid := rightIsValid && rightMin >= node.value
+		return isValid, node.value, rightMax
+	} else if node.right == nil {
+		// Recurse down into the left subtree.
+		leftIsValid, leftMin, leftMax := validateBSTRecur(node.left)
+		isValid := leftIsValid && leftMax <= node.value
+		return isValid, leftMin, node.value
+	} else {
+		// Recurse down into the left subtree first.
+		leftIsValid, leftMin, leftMax := validateBSTRecur(node.left)
+
+		// Short-circuit if the left side of the tree is not valid, to avoid
+		// unnecessarily checking the right side.
+		if !leftIsValid || leftMax > node.value {
+			return false, leftMin, node.value
+		}
+
+		// Now check the right subtree.
+		rightIsValid, rightMin, rightMax := validateBSTRecur(node.right)
+		isValid := rightIsValid && rightMin > node.value
+		return isValid, leftMin, rightMax
+	}
+}
