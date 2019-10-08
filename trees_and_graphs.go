@@ -1,5 +1,7 @@
 package ctci
 
+import "container/list"
+
 type GraphNode struct {
 	name     string
 	adjacent []*GraphNode
@@ -61,5 +63,47 @@ func GenerateBST(sortedArr []int) *BSTNode {
 		value: sortedArr[midpoint],
 		left:  GenerateBST(sortedArr[:midpoint]),
 		right: GenerateBST(sortedArr[midpoint+1:]),
+	}
+}
+
+// Generate linked lists containing nodes at each depth in a binary tree.
+func (root *BSTNode) ListOfDepths() []*list.List {
+	if root == nil {
+		return nil
+	}
+
+	leftDepths := root.left.ListOfDepths()
+	rightDepths := root.right.ListOfDepths()
+	mergedDepths := mergeDepthLists(leftDepths, rightDepths)
+
+	currDepth := list.New()
+	currDepth.PushBack(root)
+
+	return append([]*list.List{currDepth}, mergedDepths...)
+}
+
+func mergeDepthLists(left, right []*list.List) []*list.List {
+	merged := make([]*list.List, max(len(left), len(right)))
+
+	for i := 0; i < len(left) || i < len(right); i++ {
+        merged[i] = list.New()
+
+		if i < len(left) && left[i] != nil {
+			merged[i].PushBackList(left[i])
+		}
+
+		if i < len(right) && right[i] != nil {
+			merged[i].PushBackList(right[i])
+		}
+	}
+
+	return merged
+}
+
+func max(x, y int) int {
+	if x > y {
+		return x
+	} else {
+		return y
 	}
 }

@@ -1,6 +1,9 @@
 package ctci
 
-import "testing"
+import (
+    "testing"
+    "container/list"
+)
 
 func TestRouteExists(t *testing.T) {
 	graph := Graph{
@@ -50,6 +53,7 @@ func TestRouteExists(t *testing.T) {
 	}
 }
 
+// Test the GenerateBST function.
 func TestGenerateBST(t *testing.T) {
 	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
 	expectedBST := &BSTNode{
@@ -58,11 +62,11 @@ func TestGenerateBST(t *testing.T) {
 			value: 4,
 			left: &BSTNode{
 				value: 3,
-				left:  &BSTNode{
-                    value: 1,
-                    left: nil,
-                    right: nil,
-                },
+				left: &BSTNode{
+					value: 1,
+					left:  nil,
+					right: nil,
+				},
 				right: nil,
 			},
 			right: &BSTNode{
@@ -81,7 +85,7 @@ func TestGenerateBST(t *testing.T) {
 			right: &BSTNode{
 				value: 21,
 				left:  nil,
-                right: nil,
+				right: nil,
 			},
 		},
 	}
@@ -107,4 +111,44 @@ func isEqualBST(nodeX, nodeY *BSTNode) bool {
 
 	return isEqualBST(nodeX.left, nodeY.left) &&
 		isEqualBST(nodeX.right, nodeY.right)
+}
+
+func TestListOfDepths(t *testing.T) {
+	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
+	tree := GenerateBST(inputArr)
+	depths := tree.ListOfDepths()
+
+	expectedDepthVals := [][]*BSTNode{
+		{tree},
+		{tree.left, tree.right},
+		{tree.left.left, tree.left.right, tree.right.left, tree.right.right},
+		{tree.left.left.left},
+	}
+
+	if len(depths) != 4 {
+		t.Error(depths)
+	} else {
+		for i := range depths {
+			if !compareDepths(depths[i], expectedDepthVals[i]) {
+				t.Error(depths[i])
+			}
+		}
+	}
+}
+
+func compareDepths(actual *list.List, expected []*BSTNode) bool {
+	if actual.Len() != len(expected) {
+		return false
+	}
+
+	i := 0
+	for el := actual.Front(); el != nil; el = el.Next() {
+		if el.Value != expected[i] {
+			return false
+		} else {
+			i++
+		}
+	}
+
+	return true
 }
