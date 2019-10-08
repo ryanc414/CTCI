@@ -1,8 +1,8 @@
 package ctci
 
 import (
-    "testing"
-    "container/list"
+	"container/list"
+	"testing"
 )
 
 func TestRouteExists(t *testing.T) {
@@ -113,6 +113,7 @@ func isEqualBST(nodeX, nodeY *BSTNode) bool {
 		isEqualBST(nodeX.right, nodeY.right)
 }
 
+// Test the ListOfDepths function.
 func TestListOfDepths(t *testing.T) {
 	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
 	tree := GenerateBST(inputArr)
@@ -136,6 +137,7 @@ func TestListOfDepths(t *testing.T) {
 	}
 }
 
+// Compare a linked list of nodes at a particular depth with an expected slice.
 func compareDepths(actual *list.List, expected []*BSTNode) bool {
 	if actual.Len() != len(expected) {
 		return false
@@ -151,4 +153,23 @@ func compareDepths(actual *list.List, expected []*BSTNode) bool {
 	}
 
 	return true
+}
+
+// Test the CheckBalanced function.
+func TestCheckBalanced(t *testing.T) {
+	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
+	tree := GenerateBST(inputArr)
+	if !tree.CheckBalanced() {
+		t.Error()
+	}
+
+	tree.left.left.left.right = &BSTNode{
+		value: 2,
+		left:  nil,
+		right: nil,
+	}
+
+	if tree.CheckBalanced() {
+		t.Error()
+	}
 }

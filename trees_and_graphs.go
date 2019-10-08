@@ -82,11 +82,12 @@ func (root *BSTNode) ListOfDepths() []*list.List {
 	return append([]*list.List{currDepth}, mergedDepths...)
 }
 
+// Merge two depth lists from left and right subtrees.
 func mergeDepthLists(left, right []*list.List) []*list.List {
 	merged := make([]*list.List, max(len(left), len(right)))
 
 	for i := 0; i < len(left) || i < len(right); i++ {
-        merged[i] = list.New()
+		merged[i] = list.New()
 
 		if i < len(left) && left[i] != nil {
 			merged[i].PushBackList(left[i])
@@ -100,10 +101,46 @@ func mergeDepthLists(left, right []*list.List) []*list.List {
 	return merged
 }
 
+// Return maximum of two integers.
 func max(x, y int) int {
 	if x > y {
 		return x
 	} else {
 		return y
 	}
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+// Check if a binary tree is balanced. Balanced means that the height of two
+// subtrees for any given node do not differ by more than one.
+func (tree BSTNode) CheckBalanced() bool {
+	balanced, _ := checkBalancedRecur(&tree)
+	return balanced
+}
+
+// Recursive step for checking if a binary tree is balanced. Check that both
+// left and right subtrees are balanced and that their respective heights
+// differ at most by one. Return if this node is balanced and its height.
+func checkBalancedRecur(node *BSTNode) (bool, int) {
+	// Base case: an empty node is balanced and has 0 height.
+	if node == nil {
+		return true, 0
+	}
+
+	// Recurse down into the left and right subtrees.
+	leftBalanced, leftHeight := checkBalancedRecur(node.left)
+	rightBalanced, rightHeight := checkBalancedRecur(node.right)
+
+	// Now check if we are balanced and calculate the new height.
+	currHeight := max(leftHeight, rightHeight) + 1
+	heightDiff := abs(leftHeight - rightHeight)
+	balanced := leftBalanced && rightBalanced && heightDiff <= 1
+
+	return balanced, currHeight
 }
