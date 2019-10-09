@@ -45,25 +45,34 @@ func (graph Graph) RouteExists(nodeS, nodeE *GraphNode) bool {
 
 // A node in a binary search tree.
 type BSTNode struct {
-	value int
-	left  *BSTNode
-	right *BSTNode
+	value  int
+	left   *BSTNode
+	right  *BSTNode
+	parent *BSTNode
 }
 
 // Generates a binary search tree of minimal height from a sorted array of
 // unique integer elements.
 func GenerateBST(sortedArr []int) *BSTNode {
+	return generateBSTRecur(sortedArr, nil)
+}
+
+func generateBSTRecur(sortedArr []int, parent *BSTNode) *BSTNode {
 	if len(sortedArr) == 0 {
 		return nil
 	}
 
 	midpoint := (len(sortedArr) / 2)
 
-	return &BSTNode{
-		value: sortedArr[midpoint],
-		left:  GenerateBST(sortedArr[:midpoint]),
-		right: GenerateBST(sortedArr[midpoint+1:]),
+	node := &BSTNode{
+		value:  sortedArr[midpoint],
+		parent: parent,
 	}
+
+	node.left = generateBSTRecur(sortedArr[:midpoint], node)
+	node.right = generateBSTRecur(sortedArr[midpoint+1:], node)
+
+	return node
 }
 
 // Generate linked lists containing nodes at each depth in a binary tree.
@@ -187,5 +196,34 @@ func validateBSTRecur(node *BSTNode) (bool, int, int) {
 		rightIsValid, rightMin, rightMax := validateBSTRecur(node.right)
 		isValid := rightIsValid && rightMin > node.value
 		return isValid, leftMin, rightMax
+	}
+}
+
+// Return the next in-order successor to a node in a BST. If there is no
+// successor (node is the last in the tree) then nil is returned instead.
+func (node *BSTNode) Successor() *BSTNode {
+	if node.right != nil {
+		return node.right.minNode()
+	} else {
+		return node.parentSuccessor()
+	}
+}
+
+// Return the minimal node in a BST.
+func (node *BSTNode) minNode() *BSTNode {
+	if node.left != nil {
+		return node.left.minNode()
+	} else {
+		return node
+	}
+}
+
+// Return the first parent that succeeds the current node, or nil if there is
+// no parent successor.
+func (node *BSTNode) parentSuccessor() *BSTNode {
+	if node.parent == nil || node.parent.value > node.value {
+		return node.parent
+	} else {
+		return node.parent.parentSuccessor()
 	}
 }

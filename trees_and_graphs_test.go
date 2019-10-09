@@ -193,3 +193,29 @@ func TestValidateBST(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test the Successor function.
+func TestSuccessor(t *testing.T) {
+	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
+	tree := GenerateBST(inputArr)
+
+	if tree.Successor() != tree.right.left {
+		t.Error(tree.Successor())
+	}
+
+	if tree.left.left.left.Successor() != tree.left.left {
+		t.Error(tree.left.left.left.Successor())
+	}
+
+	if tree.left.right.Successor() != tree {
+		t.Error(tree.left.right.Successor())
+	}
+
+	if tree.right.left.Successor() != tree.right {
+		t.Error(tree.right.left.Successor())
+	}
+
+	if tree.right.right.Successor() != nil {
+		t.Error(tree.right.right.Successor())
+	}
+}
