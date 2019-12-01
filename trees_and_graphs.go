@@ -1,6 +1,9 @@
 package ctci
 
-import "container/list"
+import (
+    "container/list"
+    "errors"
+)
 
 type GraphNode struct {
 	name     string
@@ -226,4 +229,70 @@ func (node *BSTNode) parentSuccessor() *BSTNode {
 	} else {
 		return node.parent.parentSuccessor()
 	}
+}
+
+// Find a valid build order for projects with dependencies.
+func FindBuildOrder(projects []string,
+                    dependencies [][]string) ([]string, error) {
+    graph := buildDepGraph(projects, dependencies)
+    var buildOrder list.List
+
+    for i := range graph.nodes {
+        order, err := nodeBuildOrder(&graph.nodes[i])
+        if err != nil {
+            return nil, err
+        }
+        buildOrder.PushFrontList(&order)
+    }
+
+    return listToSlice(buildOrder), nil
+}
+
+// Build a graph of dependencies from lists of projects and pairs of
+// dependencies.
+func buildDepGraph(projects []string, dependencies [][]string) Graph {
+    depGraph := Graph{nodes: make([]GraphNode, len(projects))}
+    nodesMap := make(map[string]*GraphNode)
+
+    for i := range projects {
+        depGraph.nodes[i].name = projects[i]
+        nodesMap[projects[i]] = &depGraph.nodes[i]
+    }
+
+    for i := range dependencies {
+        nodesMap[dependencies[i][0]].adjacent = append(
+            nodesMap[dependencies[i][0]].adjacent,
+            nodesMap[dependencies[i][1]],
+        )
+    }
+
+    return depGraph
+}
+
+func nodeBuildOrder(node *GraphNode) (list.List, error) {
+    var depList list.List
+    if node.visited {
+        return depList, errors.New("Circular dependency")
+    }
+    depList.PushFront(node)
+
+    for i := range node.adjacent {
+        order, err := nodeBuildOrder(node.adjacent[i])
+        if err != nil {
+            return depList, err
+        }
+        depList.PushFrontList(&order)
+    }
+
+    return depList, nil
+}
+
+func listToSlice(buildOrder list.List) []string {
+    buildSlice := make([]string, buildOrder.Len())
+    i := 0
+    for el := buildOrder.Front(); el != nil; el = el.Next() {
+        buildSlice[i] = el.Value.name
+        i++
+    }
+    return buildSlice
 }

@@ -219,3 +219,33 @@ func TestSuccessor(t *testing.T) {
 		t.Error(tree.right.right.Successor())
 	}
 }
+
+// Test the FindBuildOrder function
+func TestFindBuildOrder(t *testing.T) {
+    projects := []string{"a", "b", "c", "d", "e", "f"}
+    dependencies := [][]string{
+        {"a", "d"},
+        {"f", "b"},
+        {"b", "d"},
+        {"f", "a"},
+        {"d", "c"},
+    }
+    expectedOrder := []string{"f", "e", "a", "b", "d", "c"}
+
+    order, err := FindBuildOrder(projects, dependencies)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    if len(order) != len(expectedOrder) {
+        t.Error(order)
+    } else {
+        for i := range order {
+            if order[i] != expectedOrder[i] {
+                t.Error(order[i])
+            }
+        }
+    }
+}
+
