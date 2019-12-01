@@ -230,20 +230,16 @@ func TestFindBuildOrder(t *testing.T) {
         {"f", "a"},
         {"d", "c"},
     }
-    expectedOrder := []string{"f", "e", "a", "b", "d", "c"}
+    expectedOrder := []string{"f", "e", "b", "a", "d", "c"}
 
-    order, err := FindBuildOrder(projects, dependencies)
-
-    if err != nil {
-        t.Error(err)
-    }
+    order := FindBuildOrder(projects, dependencies)
 
     if len(order) != len(expectedOrder) {
         t.Error(order)
     } else {
         for i := range order {
             if order[i] != expectedOrder[i] {
-                t.Error(order[i])
+                t.Error(order)
             }
         }
     }

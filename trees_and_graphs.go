@@ -1,9 +1,6 @@
 package ctci
 
-import (
-    "container/list"
-    "errors"
-)
+import "container/list"
 
 type GraphNode struct {
 	name     string
@@ -232,20 +229,16 @@ func (node *BSTNode) parentSuccessor() *BSTNode {
 }
 
 // Find a valid build order for projects with dependencies.
-func FindBuildOrder(projects []string,
-                    dependencies [][]string) ([]string, error) {
+func FindBuildOrder(projects []string, dependencies [][]string) []string {
     graph := buildDepGraph(projects, dependencies)
     var buildOrder list.List
 
     for i := range graph.nodes {
-        order, err := nodeBuildOrder(&graph.nodes[i])
-        if err != nil {
-            return nil, err
-        }
+        order := nodeBuildOrder(&graph.nodes[i])
         buildOrder.PushFrontList(&order)
     }
 
-    return listToSlice(buildOrder), nil
+    return listToSlice(buildOrder)
 }
 
 // Build a graph of dependencies from lists of projects and pairs of
@@ -269,29 +262,27 @@ func buildDepGraph(projects []string, dependencies [][]string) Graph {
     return depGraph
 }
 
-func nodeBuildOrder(node *GraphNode) (list.List, error) {
+func nodeBuildOrder(node *GraphNode) list.List {
     var depList list.List
     if node.visited {
-        return depList, errors.New("Circular dependency")
+        return depList
     }
+    node.visited = true
     depList.PushFront(node)
 
     for i := range node.adjacent {
-        order, err := nodeBuildOrder(node.adjacent[i])
-        if err != nil {
-            return depList, err
-        }
-        depList.PushFrontList(&order)
+        order := nodeBuildOrder(node.adjacent[i])
+        depList.PushBackList(&order)
     }
 
-    return depList, nil
+    return depList
 }
 
 func listToSlice(buildOrder list.List) []string {
     buildSlice := make([]string, buildOrder.Len())
     i := 0
     for el := buildOrder.Front(); el != nil; el = el.Next() {
-        buildSlice[i] = el.Value.name
+        buildSlice[i] = el.Value.(*GraphNode).name
         i++
     }
     return buildSlice
