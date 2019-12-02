@@ -1,6 +1,9 @@
 package ctci
 
-import "container/list"
+import (
+    "container/list"
+    "errors"
+)
 
 type GraphNode struct {
 	name     string
@@ -228,61 +231,96 @@ func (node *BSTNode) parentSuccessor() *BSTNode {
 	}
 }
 
+type NodeState int
+
+const (
+    BLANK = iota
+    PARTIAL
+    COMPLETE
+)
+
+type ProjectsGraphNode struct {
+	name     string
+	adjacent []*ProjectsGraphNode
+	state    NodeState
+}
+
+type ProjectsGraph struct {
+	nodes []ProjectsGraphNode
+    nodesMap map[string]*ProjectsGraphNode
+}
+
 // Find a valid build order for projects with dependencies.
-func FindBuildOrder(projects []string, dependencies [][]string) []string {
+func FindBuildOrder(projects []string,
+                    dependencies [][]string) ([]string, error) {
     graph := buildDepGraph(projects, dependencies)
     var buildOrder list.List
 
     for i := range graph.nodes {
-        order := nodeBuildOrder(&graph.nodes[i])
+        order, err := nodeBuildOrder(&graph.nodes[i])
+        if err != nil {
+            return nil, err
+        }
         buildOrder.PushFrontList(&order)
     }
 
-    return listToSlice(buildOrder)
+    return listToSlice(buildOrder), nil
 }
 
 // Build a graph of dependencies from lists of projects and pairs of
 // dependencies.
-func buildDepGraph(projects []string, dependencies [][]string) Graph {
-    depGraph := Graph{nodes: make([]GraphNode, len(projects))}
-    nodesMap := make(map[string]*GraphNode)
+func buildDepGraph(projects []string, dependencies [][]string) ProjectsGraph {
+    depGraph := ProjectsGraph{
+        nodes: make([]ProjectsGraphNode, len(projects)),
+        nodesMap: make(map[string]*ProjectsGraphNode),
+    }
 
     for i := range projects {
         depGraph.nodes[i].name = projects[i]
-        nodesMap[projects[i]] = &depGraph.nodes[i]
+        depGraph.nodesMap[projects[i]] = &depGraph.nodes[i]
     }
 
     for i := range dependencies {
-        nodesMap[dependencies[i][0]].adjacent = append(
-            nodesMap[dependencies[i][0]].adjacent,
-            nodesMap[dependencies[i][1]],
+        depGraph.nodesMap[dependencies[i][0]].adjacent = append(
+            depGraph.nodesMap[dependencies[i][0]].adjacent,
+            depGraph.nodesMap[dependencies[i][1]],
         )
     }
 
     return depGraph
 }
 
-func nodeBuildOrder(node *GraphNode) list.List {
+func nodeBuildOrder(node *ProjectsGraphNode) (list.List, error) {
     var depList list.List
-    if node.visited {
-        return depList
+    if node.state == PARTIAL {
+        return depList, errors.New("Circular dependency")
+    } else if node.state == COMPLETE {
+        return depList, nil
+    } else if node.state != BLANK {
+        return depList, errors.New("Unexpected node state")
     }
-    node.visited = true
-    depList.PushFront(node)
+
+    node.state = PARTIAL
 
     for i := range node.adjacent {
-        order := nodeBuildOrder(node.adjacent[i])
-        depList.PushBackList(&order)
+        order, err := nodeBuildOrder(node.adjacent[i])
+        if err != nil {
+            return depList, err
+        }
+        depList.PushFrontList(&order)
     }
 
-    return depList
+    node.state = COMPLETE
+    depList.PushFront(node)
+
+    return depList, nil
 }
 
 func listToSlice(buildOrder list.List) []string {
     buildSlice := make([]string, buildOrder.Len())
     i := 0
     for el := buildOrder.Front(); el != nil; el = el.Next() {
-        buildSlice[i] = el.Value.(*GraphNode).name
+        buildSlice[i] = el.Value.(*ProjectsGraphNode).name
         i++
     }
     return buildSlice

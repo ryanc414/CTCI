@@ -232,7 +232,11 @@ func TestFindBuildOrder(t *testing.T) {
     }
     expectedOrder := []string{"f", "e", "b", "a", "d", "c"}
 
-    order := FindBuildOrder(projects, dependencies)
+    order, err := FindBuildOrder(projects, dependencies)
+
+    if err != nil {
+        t.Error(err)
+    }
 
     if len(order) != len(expectedOrder) {
         t.Error(order)
@@ -242,6 +246,17 @@ func TestFindBuildOrder(t *testing.T) {
                 t.Error(order)
             }
         }
+    }
+
+    circularDeps := [][]string{
+        {"a", "b"},
+        {"b", "c"},
+        {"c", "a"},
+    }
+    order, err = FindBuildOrder(projects, circularDeps)
+
+    if err == nil {
+        t.Error(order)
     }
 }
 
