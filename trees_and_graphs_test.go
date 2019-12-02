@@ -222,41 +222,115 @@ func TestSuccessor(t *testing.T) {
 
 // Test the FindBuildOrder function
 func TestFindBuildOrder(t *testing.T) {
-    projects := []string{"a", "b", "c", "d", "e", "f"}
-    dependencies := [][]string{
-        {"a", "d"},
-        {"f", "b"},
-        {"b", "d"},
-        {"f", "a"},
-        {"d", "c"},
-    }
-    expectedOrder := []string{"f", "e", "b", "a", "d", "c"}
+	projects := []string{"a", "b", "c", "d", "e", "f"}
+	dependencies := [][]string{
+		{"a", "d"},
+		{"f", "b"},
+		{"b", "d"},
+		{"f", "a"},
+		{"d", "c"},
+	}
+	expectedOrder := []string{"f", "e", "b", "a", "d", "c"}
 
-    order, err := FindBuildOrder(projects, dependencies)
+	order, err := FindBuildOrder(projects, dependencies)
 
-    if err != nil {
-        t.Error(err)
-    }
+	if err != nil {
+		t.Error(err)
+	}
 
-    if len(order) != len(expectedOrder) {
-        t.Error(order)
-    } else {
-        for i := range order {
-            if order[i] != expectedOrder[i] {
-                t.Error(order)
-            }
-        }
-    }
+	if len(order) != len(expectedOrder) {
+		t.Error(order)
+	} else {
+		for i := range order {
+			if order[i] != expectedOrder[i] {
+				t.Error(order)
+			}
+		}
+	}
 
-    circularDeps := [][]string{
-        {"a", "b"},
-        {"b", "c"},
-        {"c", "a"},
-    }
-    order, err = FindBuildOrder(projects, circularDeps)
+	circularDeps := [][]string{
+		{"a", "b"},
+		{"b", "c"},
+		{"c", "a"},
+	}
+	order, err = FindBuildOrder(projects, circularDeps)
 
-    if err == nil {
-        t.Error(order)
-    }
+	if err == nil {
+		t.Error(order)
+	}
 }
 
+// Test finding the common ancestor of two nodes in a binary tree.
+func TestFindCommonAncestor(t *testing.T) {
+	tree := &BinTreeNode{
+		name: "A",
+		left: &BinTreeNode{
+			name: "B",
+			left: &BinTreeNode{
+				name:  "C",
+				left:  nil,
+				right: nil,
+			},
+			right: nil,
+		},
+		right: &BinTreeNode{
+			name: "D",
+			left: &BinTreeNode{
+				name: "E",
+				left: &BinTreeNode{
+					name:  "F",
+					left:  nil,
+					right: nil,
+				},
+				right: &BinTreeNode{
+					name:  "G",
+					left:  nil,
+					right: nil,
+				},
+			},
+			right: &BinTreeNode{
+				name:  "H",
+				left:  nil,
+				right: nil,
+			},
+		},
+	}
+
+	ancestor, err := FindCommonAncestor(
+		tree,
+		tree.left.left,
+		tree.right.left.left,
+	)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if ancestor != tree {
+		t.Error(ancestor)
+	}
+
+	ancestor, err = FindCommonAncestor(
+		tree,
+		tree.right.left.left,
+		tree.right.left.right,
+	)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if ancestor != tree.right.left {
+		t.Error(ancestor)
+	}
+
+	ancestor, err = FindCommonAncestor(
+		tree.right,
+		tree.right.right,
+		tree.left,
+	)
+
+	if err == nil {
+		t.Error(ancestor)
+	}
+}

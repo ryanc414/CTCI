@@ -1,8 +1,8 @@
 package ctci
 
 import (
-    "container/list"
-    "errors"
+	"container/list"
+	"errors"
 )
 
 type GraphNode struct {
@@ -234,9 +234,9 @@ func (node *BSTNode) parentSuccessor() *BSTNode {
 type NodeState int
 
 const (
-    BLANK = iota
-    PARTIAL
-    COMPLETE
+	BLANK = iota
+	PARTIAL
+	COMPLETE
 )
 
 type ProjectsGraphNode struct {
@@ -246,82 +246,149 @@ type ProjectsGraphNode struct {
 }
 
 type ProjectsGraph struct {
-	nodes []ProjectsGraphNode
-    nodesMap map[string]*ProjectsGraphNode
+	nodes    []ProjectsGraphNode
+	nodesMap map[string]*ProjectsGraphNode
 }
 
 // Find a valid build order for projects with dependencies.
 func FindBuildOrder(projects []string,
-                    dependencies [][]string) ([]string, error) {
-    graph := buildDepGraph(projects, dependencies)
-    var buildOrder list.List
+	dependencies [][]string) ([]string, error) {
+	graph := buildDepGraph(projects, dependencies)
+	var buildOrder list.List
 
-    for i := range graph.nodes {
-        order, err := nodeBuildOrder(&graph.nodes[i])
-        if err != nil {
-            return nil, err
-        }
-        buildOrder.PushFrontList(&order)
-    }
+	for i := range graph.nodes {
+		order, err := nodeBuildOrder(&graph.nodes[i])
+		if err != nil {
+			return nil, err
+		}
+		buildOrder.PushFrontList(&order)
+	}
 
-    return listToSlice(buildOrder), nil
+	return listToSlice(buildOrder), nil
 }
 
 // Build a graph of dependencies from lists of projects and pairs of
 // dependencies.
 func buildDepGraph(projects []string, dependencies [][]string) ProjectsGraph {
-    depGraph := ProjectsGraph{
-        nodes: make([]ProjectsGraphNode, len(projects)),
-        nodesMap: make(map[string]*ProjectsGraphNode),
-    }
+	depGraph := ProjectsGraph{
+		nodes:    make([]ProjectsGraphNode, len(projects)),
+		nodesMap: make(map[string]*ProjectsGraphNode),
+	}
 
-    for i := range projects {
-        depGraph.nodes[i].name = projects[i]
-        depGraph.nodesMap[projects[i]] = &depGraph.nodes[i]
-    }
+	for i := range projects {
+		depGraph.nodes[i].name = projects[i]
+		depGraph.nodesMap[projects[i]] = &depGraph.nodes[i]
+	}
 
-    for i := range dependencies {
-        depGraph.nodesMap[dependencies[i][0]].adjacent = append(
-            depGraph.nodesMap[dependencies[i][0]].adjacent,
-            depGraph.nodesMap[dependencies[i][1]],
-        )
-    }
+	for i := range dependencies {
+		depGraph.nodesMap[dependencies[i][0]].adjacent = append(
+			depGraph.nodesMap[dependencies[i][0]].adjacent,
+			depGraph.nodesMap[dependencies[i][1]],
+		)
+	}
 
-    return depGraph
+	return depGraph
 }
 
 func nodeBuildOrder(node *ProjectsGraphNode) (list.List, error) {
-    var depList list.List
-    if node.state == PARTIAL {
-        return depList, errors.New("Circular dependency")
-    } else if node.state == COMPLETE {
-        return depList, nil
-    } else if node.state != BLANK {
-        return depList, errors.New("Unexpected node state")
-    }
+	var depList list.List
+	if node.state == PARTIAL {
+		return depList, errors.New("Circular dependency")
+	} else if node.state == COMPLETE {
+		return depList, nil
+	} else if node.state != BLANK {
+		return depList, errors.New("Unexpected node state")
+	}
 
-    node.state = PARTIAL
+	node.state = PARTIAL
 
-    for i := range node.adjacent {
-        order, err := nodeBuildOrder(node.adjacent[i])
-        if err != nil {
-            return depList, err
-        }
-        depList.PushFrontList(&order)
-    }
+	for i := range node.adjacent {
+		order, err := nodeBuildOrder(node.adjacent[i])
+		if err != nil {
+			return depList, err
+		}
+		depList.PushFrontList(&order)
+	}
 
-    node.state = COMPLETE
-    depList.PushFront(node)
+	node.state = COMPLETE
+	depList.PushFront(node)
 
-    return depList, nil
+	return depList, nil
 }
 
 func listToSlice(buildOrder list.List) []string {
-    buildSlice := make([]string, buildOrder.Len())
-    i := 0
-    for el := buildOrder.Front(); el != nil; el = el.Next() {
-        buildSlice[i] = el.Value.(*ProjectsGraphNode).name
-        i++
-    }
-    return buildSlice
+	buildSlice := make([]string, buildOrder.Len())
+	i := 0
+	for el := buildOrder.Front(); el != nil; el = el.Next() {
+		buildSlice[i] = el.Value.(*ProjectsGraphNode).name
+		i++
+	}
+	return buildSlice
+}
+
+// Node in a binary tree (not necessarily a BST)
+type BinTreeNode struct {
+	name  string
+	left  *BinTreeNode
+	right *BinTreeNode
+}
+
+// Path directions may be either LEFT or RIGHT.
+type Direction int
+
+const (
+	LEFT = iota
+	RIGHT
+)
+
+func FindCommonAncestor(root, nodeA, nodeB *BinTreeNode) (*BinTreeNode, error) {
+	pathA, found := findNodePath(root, nodeA)
+	if !found {
+		return nil, errors.New("NodeA not found in tree")
+	}
+
+	pathB, found := findNodePath(root, nodeB)
+	if !found {
+		return nil, errors.New("NodeB not found in tree")
+	}
+
+	i := 0
+	ancestor := root
+	minPathLen := min(len(pathA), len(pathB))
+
+	for i < minPathLen && pathA[i] == pathB[i] {
+		if pathA[i] == LEFT {
+			ancestor = ancestor.left
+		} else {
+			ancestor = ancestor.right
+		}
+		i++
+	}
+
+	return ancestor, nil
+}
+
+// Find the path to a given node in a binary tree.
+func findNodePath(root, node *BinTreeNode) ([]Direction, bool) {
+	if root == nil {
+		return nil, false
+	}
+
+	if root == node {
+		return nil, true
+	}
+
+	leftPath, leftFound := findNodePath(root.left, node)
+	if leftFound {
+		path := append([]Direction{LEFT}, leftPath...)
+		return path, true
+	}
+
+	rightPath, rightFound := findNodePath(root.right, node)
+	if rightFound {
+		path := append([]Direction{RIGHT}, rightPath...)
+		return path, true
+	}
+
+	return nil, false
 }
