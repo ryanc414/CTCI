@@ -392,3 +392,52 @@ func findNodePath(root, node *BinTreeNode) ([]Direction, bool) {
 
 	return nil, false
 }
+
+// Find the possible sequences of values that could have created a given BST.
+func FindBSTSequences(root *BSTNode) [][]int {
+	if root == nil {
+		return nil
+	}
+	return findBSTSeqsRecur(root, nil, nil, nil)
+}
+
+func findBSTSeqsRecur(currNode *BSTNode,
+	possibleNext []*BSTNode,
+	foundSeqs [][]int,
+	currSeq []int) [][]int {
+
+	currSeq = append(currSeq, currNode.value)
+
+	if currNode.left != nil {
+		possibleNext = append(possibleNext, currNode.left)
+	}
+	if currNode.right != nil {
+		possibleNext = append(possibleNext, currNode.right)
+	}
+
+	// Check if we have reached the end of a sequence.
+	if len(possibleNext) == 0 {
+		foundSeqs = append(foundSeqs, make([]int, len(currSeq)))
+		copy(foundSeqs[len(foundSeqs)-1], currSeq)
+	} else {
+		for i := range possibleNext {
+			newPossNext := getNewPossNext(possibleNext, i)
+			foundSeqs = findBSTSeqsRecur(
+				possibleNext[i],
+				newPossNext,
+				foundSeqs,
+				currSeq,
+			)
+		}
+	}
+
+	return foundSeqs
+}
+
+func getNewPossNext(currPossNext []*BSTNode, i int) []*BSTNode {
+	newPossNext := make([]*BSTNode, len(currPossNext)-1)
+	copy(newPossNext, currPossNext[:i])
+	copy(newPossNext[i:], currPossNext[i+1:])
+
+	return newPossNext
+}

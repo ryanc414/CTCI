@@ -334,3 +334,91 @@ func TestFindCommonAncestor(t *testing.T) {
 		t.Error(ancestor)
 	}
 }
+
+// Test that the correct BST sequences can be found.
+func TestBSTSequences(t *testing.T) {
+	emptySeqs := FindBSTSequences(nil)
+	if emptySeqs != nil {
+		t.Error(emptySeqs)
+	}
+
+	basicBST := &BSTNode{
+		value: 2,
+		left: &BSTNode{
+			value: 1,
+			left:  nil,
+			right: nil,
+		},
+		right: &BSTNode{
+			value: 3,
+			left:  nil,
+			right: nil,
+		},
+	}
+
+	expectedSeqs := [][]int{
+		{2, 1, 3},
+		{2, 3, 1},
+	}
+	foundSeqs := FindBSTSequences(basicBST)
+
+	if !compareSeqs(foundSeqs, expectedSeqs) {
+		t.Error(foundSeqs)
+	}
+
+	nonBasicBST := &BSTNode{
+		value: 5,
+		left: &BSTNode{
+			value: 3,
+			left: &BSTNode{
+				value: 1,
+				left:  nil,
+				right: nil,
+			},
+			right: nil,
+		},
+		right: &BSTNode{
+			value: 7,
+			left: &BSTNode{
+				value: 6,
+				left:  nil,
+				right: nil,
+			},
+			right: nil,
+		},
+	}
+	expectedSeqs = [][]int{
+		{5, 3, 7, 1, 6},
+		{5, 3, 7, 6, 1},
+		{5, 3, 1, 7, 6},
+		{5, 7, 3, 6, 1},
+		{5, 7, 3, 1, 6},
+		{5, 7, 6, 3, 1},
+	}
+
+	foundSeqs = FindBSTSequences(nonBasicBST)
+
+	if !compareSeqs(foundSeqs, expectedSeqs) {
+		t.Error(foundSeqs)
+	}
+}
+
+func compareSeqs(foundSeqs, expectedSeqs [][]int) bool {
+	if len(foundSeqs) != len(expectedSeqs) {
+		return false
+	} else {
+		for i := range expectedSeqs {
+			if len(foundSeqs[i]) != len(expectedSeqs[i]) {
+				return false
+			} else {
+				for j := range expectedSeqs[i] {
+					if foundSeqs[i][j] != expectedSeqs[i][j] {
+						return false
+					}
+				}
+			}
+		}
+	}
+
+	return true
+}
