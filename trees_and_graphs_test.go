@@ -422,3 +422,84 @@ func compareSeqs(foundSeqs, expectedSeqs [][]int) bool {
 
 	return true
 }
+
+// Test the CheckSubtree function.
+func TestCheckSubtree(t *testing.T) {
+	if !CheckSubtree(nil, nil) {
+		t.Error()
+	}
+
+	T1 := &BinTreeNode{
+		name: "A",
+		left: &BinTreeNode{
+			name: "B",
+			left: &BinTreeNode{
+				name:  "C",
+				left:  nil,
+				right: nil,
+			},
+			right: &BinTreeNode{
+				name:  "D",
+				left:  nil,
+				right: nil,
+			},
+		},
+		right: &BinTreeNode{
+			name: "E",
+			left: &BinTreeNode{
+				name:  "F",
+				left:  nil,
+				right: nil,
+			},
+			right: nil,
+		},
+	}
+
+	T2 := &BinTreeNode{
+		name: "B",
+		left: &BinTreeNode{
+			name:  "C",
+			left:  nil,
+			right: nil,
+		},
+		right: &BinTreeNode{
+			name:  "D",
+			left:  nil,
+			right: nil,
+		},
+	}
+
+	if CheckSubtree(T1, nil) {
+		t.Error()
+	}
+
+	if CheckSubtree(nil, T2) {
+		t.Error()
+	}
+
+	if !CheckSubtree(T1, T2) {
+		t.Error()
+	}
+
+	T3 := &BinTreeNode{
+		name: "B",
+		left: &BinTreeNode{
+			name:  "C",
+			left:  nil,
+			right: nil,
+		},
+		right: &BinTreeNode{
+			name: "D",
+			left: &BinTreeNode{
+				name:  "E",
+				left:  nil,
+				right: nil,
+			},
+			right: nil,
+		},
+	}
+
+	if CheckSubtree(T1, T3) {
+		t.Error()
+	}
+}

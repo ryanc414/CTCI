@@ -441,3 +441,36 @@ func getNewPossNext(currPossNext []*BSTNode, i int) []*BSTNode {
 
 	return newPossNext
 }
+
+// Check if T2 is a subtree of T1.
+func CheckSubtree(T1, T2 *BinTreeNode) bool {
+	if T1 == T2 {
+		return true
+	}
+
+	if T1 == nil || T2 == nil {
+		return false
+	}
+
+	if equalTree(T1, T2) {
+		return true
+	}
+
+	return CheckSubtree(T1.left, T2) || CheckSubtree(T1.right, T2)
+}
+
+// Check if two trees are equal.
+func equalTree(T1, T2 *BinTreeNode) bool {
+	if T1 == T2 {
+		return true
+	}
+
+	if T1 == nil || T2 == nil {
+		return false
+	}
+
+	return T1.name == T2.name &&
+		equalTree(T1.left, T2.left) &&
+		equalTree(T1.right, T2.right)
+}
+
