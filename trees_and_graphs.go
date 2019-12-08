@@ -562,30 +562,47 @@ type IntBinTree struct {
 	right *IntBinTree
 }
 
-func PathsWithSum(node *IntBinTree, sum int) int {
+func PathsWithSum(node *IntBinTree, targetSum int) int {
+	pathCount := make(map[int]int)
+	return countPathsWithSumRecur(node, targetSum, 0, pathCount)
+}
+
+func countPathsWithSumRecur(node *IntBinTree,
+	targetSum,
+	runningSum int,
+	pathCount map[int]int) int {
 	if node == nil {
-		if sum == 0 {
-			return 1
-		} else {
-			return 0
-		}
+		return 0
 	}
 
-	pathSum := 0
+	runningSum += node.value
+	sum := runningSum - targetSum
+	totalPaths := pathCount[sum]
 
-	if node.left != nil {
-		pathSum += PathsWithSum(node.left, sum) +
-			PathsWithSum(node.left, sum-node.value)
+	// If runningSum == targetSum, there is an additional path starting at root.
+	if runningSum == targetSum {
+		totalPaths++
 	}
 
-	if node.right != nil {
-		pathSum += PathsWithSum(node.right, sum) +
-			PathsWithSum(node.right, sum-node.value)
-	}
+	pathCount[runningSum]++
+	totalPaths += countPathsWithSumRecur(
+		node.left,
+		targetSum,
+		runningSum,
+		pathCount,
+	)
+	totalPaths += countPathsWithSumRecur(
+		node.right,
+		targetSum,
+		runningSum,
+		pathCount,
+	)
 
-	if node.value == sum {
-		return pathSum + 1
-	} else {
-		return pathSum
-	}
+    if pathCount[runningSum] == 1 {
+        delete(pathCount, runningSum)
+    } else {
+        pathCount[runningSum]--
+    }
+
+	return totalPaths
 }

@@ -549,10 +549,6 @@ func TestGetNodeAtIndex(t *testing.T) {
 
 // Test finding all paths through a tree that sum to a given total.
 func TestPathsWithSum(t *testing.T) {
-	if PathsWithSum(nil, 0) != 1 {
-		t.Error()
-	}
-
 	if PathsWithSum(nil, 9) != 0 {
 		t.Error()
 	}
