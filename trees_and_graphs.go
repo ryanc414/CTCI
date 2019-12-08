@@ -496,53 +496,28 @@ func InitCountedBST(rootValue int) *CountedBSTNode {
 
 // Get the node at the specified index in the in-order traversal.
 func (root *CountedBSTNode) GetNodeAtIndex(index int) (*CountedBSTNode, error) {
-    if root == nil {
-        return nil, errors.New("Empty tree")
-    }
+	if root == nil {
+		return nil, errors.New("Empty tree")
+	}
 
 	if index < 0 || index >= root.count {
 		return nil, errors.New("Invalid index")
 	}
 
-	// If the root count is 1, the left and right nodes MUST both be nil for a
-	// valid tree.
-	if root.count == 1 {
-		if index != 0 || root.left != nil || root.right != nil {
-			return nil, errors.New("Invalid tree")
-		}
+	var leftCount int
+	if root.left == nil {
+		leftCount = 0
+	} else {
+		leftCount = root.left.count
+	}
+
+	if index < leftCount {
+		return root.left.GetNodeAtIndex(index)
+	} else if index == leftCount {
 		return root, nil
+	} else {
+		return root.right.GetNodeAtIndex(index - leftCount - 1)
 	}
-
-	if root.left != nil {
-		if index < root.left.count {
-			// Recurse down into the left subtree.
-			return root.left.GetNodeAtIndex(index)
-		}
-
-		if index == root.left.count {
-			return root, nil
-		}
-
-		// root.right must be non-nil for a valid tree.
-		if root.right == nil {
-			return nil, errors.New("Invalid tree")
-		}
-
-		// Recurse down into the right subtree.
-		return root.right.GetNodeAtIndex(index - root.left.count - 1)
-	}
-
-	// root.right must be non-nil for a valid tree.
-	if root.right == nil {
-		return nil, errors.New("Invalid tree")
-	}
-
-	if index == 0 {
-		return root, nil
-	}
-
-	// Recurse down into right subtree.
-	return root.right.GetNodeAtIndex(index - 1)
 }
 
 // Get a random node from a counted BST.

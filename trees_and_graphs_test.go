@@ -507,7 +507,7 @@ func TestCheckSubtree(t *testing.T) {
 // Test getting a value from a counted BST at a specific index in the in-order
 // traversal.
 func TestGetNodeAtIndex(t *testing.T) {
-    var root *CountedBSTNode
+	var root *CountedBSTNode
 	node, err := root.GetNodeAtIndex(0)
 	if err == nil {
 		t.Error(node)
