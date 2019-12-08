@@ -555,3 +555,37 @@ func (root *CountedBSTNode) Insert(value int) {
 		}
 	}
 }
+
+type IntBinTree struct {
+	value int
+	left  *IntBinTree
+	right *IntBinTree
+}
+
+func PathsWithSum(node *IntBinTree, sum int) int {
+	if node == nil {
+		if sum == 0 {
+			return 1
+		} else {
+			return 0
+		}
+	}
+
+	pathSum := 0
+
+	if node.left != nil {
+		pathSum += PathsWithSum(node.left, sum) +
+			PathsWithSum(node.left, sum-node.value)
+	}
+
+	if node.right != nil {
+		pathSum += PathsWithSum(node.right, sum) +
+			PathsWithSum(node.right, sum-node.value)
+	}
+
+	if node.value == sum {
+		return pathSum + 1
+	} else {
+		return pathSum
+	}
+}

@@ -546,3 +546,57 @@ func TestGetNodeAtIndex(t *testing.T) {
 		t.Error(node)
 	}
 }
+
+// Test finding all paths through a tree that sum to a given total.
+func TestPathsWithSum(t *testing.T) {
+	if PathsWithSum(nil, 0) != 1 {
+		t.Error()
+	}
+
+	if PathsWithSum(nil, 9) != 0 {
+		t.Error()
+	}
+
+	tree := &IntBinTree{
+		value: 2,
+		left: &IntBinTree{
+			value: -2,
+			left: &IntBinTree{
+				value: 1,
+				left:  nil,
+				right: nil,
+			},
+			right: &IntBinTree{
+				value: 1,
+				left:  nil,
+				right: nil,
+			},
+		},
+		right: &IntBinTree{
+			value: 3,
+			left: &IntBinTree{
+				value: -5,
+				left: &IntBinTree{
+					value: 3,
+					left:  nil,
+					right: nil,
+				},
+				right: nil,
+			},
+			right: &IntBinTree{
+				value: -4,
+				left:  nil,
+				right: &IntBinTree{
+					value: 2,
+					left:  nil,
+					right: nil,
+				},
+			},
+		},
+	}
+
+	numPaths := PathsWithSum(tree, 1)
+	if numPaths != 7 {
+		t.Error(numPaths)
+	}
+}
