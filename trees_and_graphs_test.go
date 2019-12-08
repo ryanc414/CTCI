@@ -503,3 +503,46 @@ func TestCheckSubtree(t *testing.T) {
 		t.Error()
 	}
 }
+
+// Test getting a value from a counted BST at a specific index in the in-order
+// traversal.
+func TestGetNodeAtIndex(t *testing.T) {
+    var root *CountedBSTNode
+	node, err := root.GetNodeAtIndex(0)
+	if err == nil {
+		t.Error(node)
+	}
+
+	root = InitCountedBST(10)
+	root.Insert(4)
+	root.Insert(13)
+	root.Insert(2)
+	root.Insert(8)
+	root.Insert(15)
+
+	node, err = root.GetNodeAtIndex(3)
+	if err != nil {
+		t.Error(err)
+	}
+	if node == nil || node.value != 10 {
+		t.Error(node)
+	}
+
+	node, err = root.GetNodeAtIndex(5)
+	if err != nil {
+		t.Error(err)
+	}
+	if node == nil || node.value != 15 {
+		t.Error(node)
+	}
+
+	node, err = root.GetNodeAtIndex(-1)
+	if err == nil {
+		t.Error(node)
+	}
+
+	node, err = root.GetNodeAtIndex(6)
+	if err == nil {
+		t.Error(node)
+	}
+}

@@ -3,6 +3,7 @@ package ctci
 import (
 	"container/list"
 	"errors"
+	"math/rand"
 )
 
 type GraphNode struct {
@@ -474,3 +475,108 @@ func equalTree(T1, T2 *BinTreeNode) bool {
 		equalTree(T1.right, T2.right)
 }
 
+// A counted BST node keeps track of the total number of nodes in its subtree,
+// including itself.
+type CountedBSTNode struct {
+	value int
+	count int
+	left  *CountedBSTNode
+	right *CountedBSTNode
+}
+
+// Initialise the root node of a counted BST.
+func InitCountedBST(rootValue int) *CountedBSTNode {
+	return &CountedBSTNode{
+		value: rootValue,
+		count: 1,
+		left:  nil,
+		right: nil,
+	}
+}
+
+// Get the node at the specified index in the in-order traversal.
+func (root *CountedBSTNode) GetNodeAtIndex(index int) (*CountedBSTNode, error) {
+    if root == nil {
+        return nil, errors.New("Empty tree")
+    }
+
+	if index < 0 || index >= root.count {
+		return nil, errors.New("Invalid index")
+	}
+
+	// If the root count is 1, the left and right nodes MUST both be nil for a
+	// valid tree.
+	if root.count == 1 {
+		if index != 0 || root.left != nil || root.right != nil {
+			return nil, errors.New("Invalid tree")
+		}
+		return root, nil
+	}
+
+	if root.left != nil {
+		if index < root.left.count {
+			// Recurse down into the left subtree.
+			return root.left.GetNodeAtIndex(index)
+		}
+
+		if index == root.left.count {
+			return root, nil
+		}
+
+		// root.right must be non-nil for a valid tree.
+		if root.right == nil {
+			return nil, errors.New("Invalid tree")
+		}
+
+		// Recurse down into the right subtree.
+		return root.right.GetNodeAtIndex(index - root.left.count - 1)
+	}
+
+	// root.right must be non-nil for a valid tree.
+	if root.right == nil {
+		return nil, errors.New("Invalid tree")
+	}
+
+	if index == 0 {
+		return root, nil
+	}
+
+	// Recurse down into right subtree.
+	return root.right.GetNodeAtIndex(index - 1)
+}
+
+// Get a random node from a counted BST.
+func (root *CountedBSTNode) GetRandomNode() *CountedBSTNode {
+	randIndex := rand.Intn(root.count)
+	node, err := root.GetNodeAtIndex(randIndex)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return node
+}
+
+// Insert a new value into a counted BST, making sure to update the count
+// of all nodes as required.
+func (root *CountedBSTNode) Insert(value int) {
+	if root == nil {
+		panic("Cannot insert value into empty tree")
+	}
+
+	root.count++
+
+	if value < root.value {
+		if root.left == nil {
+			root.left = InitCountedBST(value)
+		} else {
+			root.left.Insert(value)
+		}
+	} else {
+		if root.right == nil {
+			root.right = InitCountedBST(value)
+		} else {
+			root.right.Insert(value)
+		}
+	}
+}
