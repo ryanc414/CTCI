@@ -598,11 +598,11 @@ func countPathsWithSumRecur(node *IntBinTree,
 		pathCount,
 	)
 
-    if pathCount[runningSum] == 1 {
-        delete(pathCount, runningSum)
-    } else {
-        pathCount[runningSum]--
-    }
+	if pathCount[runningSum] == 1 {
+		delete(pathCount, runningSum)
+	} else {
+		pathCount[runningSum]--
+	}
 
 	return totalPaths
 }
