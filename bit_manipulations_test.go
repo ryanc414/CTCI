@@ -41,3 +41,21 @@ func TestBinaryString(t *testing.T) {
 		t.Error(output)
 	}
 }
+
+// Test the FlipBitToWin function.
+func TestFlipBitToWin(t *testing.T) {
+	res := FlipBitToWin(0)
+	if res != 1 {
+		t.Error(res)
+	}
+
+	res = FlipBitToWin(1775)
+	if res != 8 {
+		t.Error(res)
+	}
+
+	res = FlipBitToWin(-1)
+	if res != 32 {
+		t.Error(res)
+	}
+}
