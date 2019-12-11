@@ -49,15 +49,7 @@ func FlipBitToWin(x int32) int {
 
 	bits := intToBits(x)
 	groups := bitsToGroups(bits[:])
-
-	if len(groups) > 1 {
-		return sumLargestPair(groups) + 1
-	} else if len(groups) == 1 {
-		return groups[0] + 1
-	} else {
-		// Must be all zeroes, so one bit may be flipped.
-		return 1
-	}
+    return mostBitsFromGroups(groups)
 }
 
 // Convert a 32-bit integer to an array of bools indicating the bits.
@@ -80,38 +72,76 @@ func intToBits(x int32) [32]bool {
 }
 
 // Convert a slice of bits to a slice containing the size of contiguous groups
-// of 1s.
+// of 0s and 1s.
 func bitsToGroups(bits []bool) []int {
 	var groups []int
 	currGroupSize := 0
+    currCounting := false  // start counting 0s
 
 	for i := range bits {
-		if bits[i] {
+		if bits[i] == currCounting {
 			currGroupSize++
-		} else if currGroupSize > 0 {
+		} else {
 			groups = append(groups, currGroupSize)
-			currGroupSize = 0
+			currGroupSize = 1
+            currCounting = !currCounting
 		}
 	}
 
 	if currGroupSize > 0 {
 		groups = append(groups, currGroupSize)
-		currGroupSize = 0
 	}
 
 	return groups
 }
 
-// Return the largest sum of an adjacent pair of values in a slice.
-func sumLargestPair(vals []int) int {
-	largestPair := 0
+// Return the largest size group of 1 bits that can be made by flipping
+// exactly one bit given the size of alternating groups of 0s and 1s.
+func mostBitsFromGroups(groups []int) int {
+    if len(groups) == 0 {
+        return 0
+    } else if len(groups) == 1 {
+        return 1
+    }
 
-	for i := 0; i < len(vals)-1; i++ {
-		pairSum := vals[i] + vals[i+1]
-		if pairSum > largestPair {
-			largestPair = pairSum
-		}
-	}
+    mostBits := 0
 
-	return largestPair
+    for i := 0; i < len(groups); i += 2 {
+        if groups[i] > 0 {
+            var numBits int
+
+            if groups[i] == 1 {
+                numBits = leftBits(groups, i) + rightBits(groups, i) + 1
+            } else {
+                numBits = max(leftBits(groups, i), rightBits(groups, i)) + 1
+            }
+
+            if numBits > mostBits {
+                mostBits = numBits
+            }
+        }
+    }
+
+    return mostBits
+}
+
+// Return the number of bits to the left of the current position, or 0 if at
+// the start.
+func leftBits(groups []int, i int) int {
+    if i > 0 {
+        return groups[i - 1]
+    } else {
+        return 0
+    }
+}
+
+
+// Return the number of bits to the right of the current position, or 0 if at
+// the end.
+func rightBits(groups []int, i int) int {
+    if i + 1 < len(groups) {
+        return groups[i + 1]
+    } else {
+        return 0
+    }
 }
