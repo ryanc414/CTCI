@@ -59,3 +59,23 @@ func TestFlipBitToWin(t *testing.T) {
 		t.Error(res)
 	}
 }
+
+// Test the SwapBits function.
+func TestSwapBits(t *testing.T) {
+	var x int32 = 0b1101110011
+	var expectedSmaller int32 = 0b1101101011
+	var expectedLarger int32 = 0b1101110101
+
+	smaller, larger, err := SwapBits(x)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if smaller != expectedSmaller {
+		t.Error(smaller)
+	}
+
+	if larger != expectedLarger {
+		t.Error(larger)
+	}
+}
