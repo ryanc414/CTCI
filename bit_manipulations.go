@@ -122,3 +122,18 @@ func GetPrev(x int32) (int32, error) {
 
 	return x - (1 << c1) - (1 << (c0 - 1)) + 1, nil
 }
+
+// Calculate the number of bit flips required to turn integer x into integer y.
+func FlipsRequired(x, y int32) int {
+	numFlips := 0
+
+	for x != y {
+		if (x & 1) != (y & 1) {
+			numFlips++
+		}
+		x >>= 1
+		y >>= 1
+	}
+
+	return numFlips
+}

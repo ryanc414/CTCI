@@ -87,3 +87,12 @@ func TestNextAndPrev(t *testing.T) {
 		t.Error(prev)
 	}
 }
+
+// Test finding the number of bit flips required to convert one integer into
+// another.
+func TestFlipsRequired(t *testing.T) {
+	numFlips := FlipsRequired(29, 15)
+	if numFlips != 2 {
+		t.Error(numFlips)
+	}
+}
