@@ -96,3 +96,14 @@ func TestFlipsRequired(t *testing.T) {
 		t.Error(numFlips)
 	}
 }
+
+// Test the pairwise swap.
+func TestSwapPairs(t *testing.T) {
+	var input int32 = 0b101110100111
+	var expectedOutput int32 = 0b011101011011
+
+	output := SwapPairs(input)
+	if output != expectedOutput {
+		t.Error(output)
+	}
+}

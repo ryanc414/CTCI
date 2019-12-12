@@ -137,3 +137,31 @@ func FlipsRequired(x, y int32) int {
 
 	return numFlips
 }
+
+// Swap odd and even position bits in an integer.
+func SwapPairs(x int32) int32 {
+	evenComb := generateComb()
+	oddComb := (evenComb << 1) | 1
+
+	oddBits := x & oddComb
+	evenBits := x & evenComb
+
+	evenBits >>= 1
+	oddBits <<= 1
+
+	return evenBits | oddBits
+}
+
+// Generate an alternating comb of 1s and 0s
+func generateComb() int32 {
+	var comb int32 = 0
+
+	for i := 0; i < 31; i++ {
+		if i%2 == 0 {
+			comb |= 1
+		}
+		comb <<= 1
+	}
+
+	return comb
+}
