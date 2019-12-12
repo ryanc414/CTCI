@@ -75,44 +75,50 @@ func FlipBitToWin(x int32) int {
 	return maxLength
 }
 
-// Return the next-smallest and next-largest integers that can be made with
-// the same number of 0s and 1s.
-func SwapBits(x int32) (int32, int32, error) {
-	var mask int32 = 1
-	prevBit := (x & mask) != 0
-	mask <<= 1
-	swapped := make([]int32, 0, 2)
+// Get the next smallest integer with the same number of binary 1s.
+func GetNext(x int32) (int32, error) {
+	tmp := x
+	c0 := 0
+	c1 := 0
 
-	for mask != 0 && len(swapped) < 2 {
-		currBit := (x & mask) != 0
-		if currBit != prevBit {
-			swapped = append(swapped, swapMask(x, mask, currBit))
-		}
-		mask <<= 1
-		prevBit = currBit
+	for ((tmp & 1) == 0) && (tmp != 0) {
+		c0++
+		tmp >>= 1
 	}
 
-	if len(swapped) != 2 {
-		return 0, 0, errors.New("Could not find all pairs to swap")
+	for (tmp & 1) == 1 {
+		c1++
+		tmp >>= 1
 	}
 
-	if swapped[0] > swapped[1] {
-		return swapped[1], swapped[0], nil
-	} else {
-		return swapped[0], swapped[1], nil
+	// If x == 11..1100..00 then there is no bigger number with the same number
+	// of 1s
+	if c0+c1 == 31 || c0+c1 == 0 {
+		return 0, errors.New("There is no next number.")
 	}
+
+	return x + (1 << c0) + (1 << (c1 - 1)) - 1, nil
 }
 
-func swapMask(x, mask int32, currBit bool) int32 {
-	if currBit {
-		swapped := x &^ mask
-		mask >>= 1
-		swapped |= mask
-		return swapped
-	} else {
-		swapped := x | mask
-		mask >>= 1
-		swapped &^= mask
-		return swapped
+// Get the previous largest integer with the same number of binary 1s.
+func GetPrev(x int32) (int32, error) {
+	tmp := x
+	c0 := 0
+	c1 := 0
+
+	for (tmp & 1) == 1 {
+		c1++
+		tmp >>= 1
 	}
+
+	if tmp == 0 {
+		return 0, errors.New("There is no previous number.")
+	}
+
+	for (tmp&1) == 0 && tmp != 0 {
+		c0++
+		tmp >>= 1
+	}
+
+	return x - (1 << c1) - (1 << (c0 - 1)) + 1, nil
 }

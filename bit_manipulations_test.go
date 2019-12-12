@@ -60,32 +60,30 @@ func TestFlipBitToWin(t *testing.T) {
 	}
 }
 
-// Test the SwapBits function.
-func TestSwapBits(t *testing.T) {
+// Test getting the next and previous numbers with the same number of 1s.
+func TestNextAndPrev(t *testing.T) {
 	var x int32 = 0b1101110011
-	var expectedSmaller int32 = 0b1101101011
-	var expectedLarger int32 = 0b1101110101
+	var expectedNext int32 = 0b1101110101
+	var expectedPrev int32 = 0b1101101110
 
-	smaller, larger, err := SwapBits(x)
+	next, err := GetNext(x)
 	if err != nil {
 		t.Error(err)
 	}
-
-	if smaller != expectedSmaller {
-		t.Error(smaller)
+	if next != expectedNext {
+		t.Error(next)
 	}
 
-	if larger != expectedLarger {
-		t.Error(larger)
+	prev, err := GetPrev(x)
+	if err != nil {
+		t.Error(err)
+	}
+	if prev != expectedPrev {
+		t.Error(prev)
 	}
 
-	smaller, larger, err = SwapBits(0)
+	prev, err = GetPrev(0)
 	if err == nil {
-		t.Error()
-	}
-
-	smaller, larger, err = SwapBits(-1)
-	if err == nil {
-		t.Error()
+		t.Error(prev)
 	}
 }
