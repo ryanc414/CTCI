@@ -78,4 +78,14 @@ func TestSwapBits(t *testing.T) {
 	if larger != expectedLarger {
 		t.Error(larger)
 	}
+
+	smaller, larger, err = SwapBits(0)
+	if err == nil {
+		t.Error()
+	}
+
+	smaller, larger, err = SwapBits(-1)
+	if err == nil {
+		t.Error()
+	}
 }

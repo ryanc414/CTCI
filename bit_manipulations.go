@@ -78,60 +78,41 @@ func FlipBitToWin(x int32) int {
 // Return the next-smallest and next-largest integers that can be made with
 // the same number of 0s and 1s.
 func SwapBits(x int32) (int32, int32, error) {
-	pair1, pair2, err := findPairs(x)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	swapped1 := swapBitPairs(x, pair1)
-	swapped2 := swapBitPairs(x, pair2)
-
-	if swapped1 > swapped2 {
-		return swapped2, swapped1, nil
-	} else {
-		return swapped1, swapped2, nil
-	}
-}
-
-func findPairs(x int32) (int, int, error) {
-	prevBit := x & 1
-	pairs := make([]int, 0, 2)
-	x >>= 1
-	i := 0
-
-	for x != 0 && len(pairs) < 2 {
-		currBit := x & 1
-		if currBit != prevBit {
-			pairs = append(pairs, i)
-		}
-		i++
-		prevBit = currBit
-		x >>= 1
-	}
-
-	if len(pairs) != 2 {
-		return 0, 0, errors.New("Could not find pairs")
-	}
-
-	return pairs[0], pairs[1], nil
-}
-
-func swapBitPairs(x int32, pairPos int) int32 {
 	var mask int32 = 1
+	prevBit := (x & mask) != 0
+	mask <<= 1
+	swapped := make([]int32, 0, 2)
 
-	for i := 0; i < pairPos; i++ {
+	for mask != 0 && len(swapped) < 2 {
+		currBit := (x & mask) != 0
+		if currBit != prevBit {
+			swapped = append(swapped, swapMask(x, mask, currBit))
+		}
 		mask <<= 1
+		prevBit = currBit
 	}
 
-	if x&mask != 0 {
+	if len(swapped) != 2 {
+		return 0, 0, errors.New("Could not find all pairs to swap")
+	}
+
+	if swapped[0] > swapped[1] {
+		return swapped[1], swapped[0], nil
+	} else {
+		return swapped[0], swapped[1], nil
+	}
+}
+
+func swapMask(x, mask int32, currBit bool) int32 {
+	if currBit {
 		swapped := x &^ mask
-		mask <<= 1
-		swapped = swapped | mask
+		mask >>= 1
+		swapped |= mask
 		return swapped
 	} else {
 		swapped := x | mask
-		mask <<= 1
-		swapped = swapped &^ mask
+		mask >>= 1
+		swapped &^= mask
 		return swapped
 	}
 }
