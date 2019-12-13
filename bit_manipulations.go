@@ -2,6 +2,7 @@ package ctci
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -164,4 +165,102 @@ func generateComb() int32 {
 	}
 
 	return comb
+}
+
+// Draw a horizontal line on a "screen" represented by an array of bytes,
+// where each bit in the array represents a single monochrome pixel.
+func DrawLine(screen []byte, width, x1, x2, y int) error {
+	// Error checking inputs.
+	if x1 < 0 || x1 >= width || x1 > x2 {
+		return errors.New("Invalid x1 value")
+	}
+
+	if x2 < 0 || x2 > width {
+		return errors.New("Invalid x2 value")
+	}
+
+	if width%8 != 0 {
+		return errors.New("Invalid width")
+	}
+
+	height := len(screen) / (width / 8)
+
+	if y < 0 || y >= height {
+		return errors.New("Invalid y")
+	}
+
+	rowStart := y * (width / 8)
+	startByte := rowStart + (x1 / 8)
+	endByte := rowStart + (x2 / 8)
+
+	if startByte == endByte {
+		screen[startByte] |= getStartEndByte(x1, x2)
+	} else {
+		screen[startByte] |= getStartByte(x1)
+
+		for i := startByte + 1; i < endByte; i++ {
+			screen[i] = 0xff
+		}
+
+		screen[endByte] |= getEndByte(x2)
+	}
+
+	return nil
+}
+
+// Return the byte for a line that lies entirely within a single byte
+// boundary.
+func getStartEndByte(x1, x2 int) byte {
+	return getStartByte(x1) & getEndByte(x2)
+}
+
+func getStartByte(x1 int) byte {
+	if x1%8 == 0 {
+		return 0xff
+	} else {
+		return (0x01 << (8 - (x1 % 8))) - 1
+	}
+}
+
+func getEndByte(x2 int) byte {
+	if x2%8 == 7 {
+		return 0xff
+	} else {
+		return ^getStartByte(x2 + 1)
+	}
+}
+
+// Print out a "screen" of pixels.
+func PrintScreen(screen []byte, width int) error {
+	if width%8 != 0 {
+		return errors.New("Invalid width")
+	}
+
+	var sb strings.Builder
+	numRows := len(screen) / (width / 8)
+	numCols := width / 8
+
+	for row := 0; row < numRows; row++ {
+		for col := 0; col < numCols; col++ {
+			writeScreenByte(&sb, screen[(row*numCols)+col])
+		}
+		sb.WriteRune('\n')
+	}
+
+	fmt.Print(sb.String())
+
+	return nil
+}
+
+func writeScreenByte(sb *strings.Builder, screenByte byte) {
+	var mask byte = 0x80
+
+	for i := 0; i < 8; i++ {
+		if mask&screenByte == 0 {
+			sb.WriteRune('.')
+		} else {
+			sb.WriteRune('-')
+		}
+		mask >>= 1
+	}
 }

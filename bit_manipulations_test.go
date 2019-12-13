@@ -1,6 +1,8 @@
 package ctci
 
-import "testing"
+import (
+	"testing"
+)
 
 // Test inserting one section of a 32 bit number into another.
 func TestInsertion(t *testing.T) {
@@ -106,4 +108,48 @@ func TestSwapPairs(t *testing.T) {
 	if output != expectedOutput {
 		t.Error(output)
 	}
+}
+
+// Test drawing some lines.
+func TestDrawLine(t *testing.T) {
+	screen := make([]byte, 32)
+
+	err := DrawLine(screen, 16, 6, 13, 11)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedScreen := make([]byte, 32)
+	expectedScreen[22] = 0x03
+	expectedScreen[23] = 0xfc
+
+	if !compareScreens(screen, expectedScreen) {
+		t.Error(screen)
+	}
+
+	err = DrawLine(screen, 16, 11, 14, 6)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedScreen[13] = 0x1e
+
+	if !compareScreens(screen, expectedScreen) {
+		t.Error(screen)
+	}
+}
+
+// Return true if two screens are equal in value, false otherwise.
+func compareScreens(actual, expected []byte) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+
+	for i := 0; i < len(actual); i++ {
+		if actual[i] != expected[i] {
+			return false
+		}
+	}
+
+	return true
 }
