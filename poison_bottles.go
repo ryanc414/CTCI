@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	math_rand "math/rand"
-    "errors"
 )
 
 const NUM_BOTTLES = 1000
@@ -13,14 +12,15 @@ const NUM_BOTTLES = 1000
 func main() {
     bottles := make([]bool, NUM_BOTTLES)
     seedRng()
-    bottles[math_rand.Intn(NUM_BOTTLES)] = true
+    actualIndex := math_rand.Intn(NUM_BOTTLES)
+    bottles[actualIndex] = true
 
-    index, numDays, err := FindPoisonBottle(bottles, 10, 0)
-    if err != nil {
-        panic(err)
+    index := FindPoisonBottle(bottles)
+    if index != actualIndex {
+        panic(fmt.Sprintf("Got index %v, expected %v", index, actualIndex))
     }
 
-    fmt.Printf("Found poison bottle at index %v in %v days\n", index, numDays)
+    fmt.Printf("Found poison bottle at index %v\n", index)
 }
 
 // Seed the RNG so that different results are produced each time.
@@ -34,42 +34,55 @@ func seedRng() {
 	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 }
 
+type TestStrip struct {
+    result bool
+}
+
 // Find the poisoned bottle using binary search.
-func FindPoisonBottle(bottles []bool,
-                      numStrips,
-                      numDays int) (int, int, error) {
-    if len(bottles) == 1 {
-        return 0, numDays, nil
+func FindPoisonBottle(bottles []bool) int {
+    results := runTests(bottles)
+    return getBottleIndex(results)
+}
+
+// Test each strip for poison.
+func runTests(bottles []bool) []bool {
+    results := make([]bool, 10)
+
+    for i := range bottles {
+        addDropsForBottle(results, bottles, i)
     }
 
-    if numStrips < 1 {
-        return -1, numDays, errors.New("Ran out of strips")
-    }
+    return results
+}
 
-    halfway := len(bottles) / 2
-    leftResult := TestPoison(bottles[:halfway])
+// Add drops from a single bottle to the test strips.
+func addDropsForBottle(results []bool,
+                       bottles []bool,
+                       bottleIndex int) {
+    stripIndex := 0
+    indexCopy := bottleIndex
 
-    if leftResult {
-        fmt.Println("Check left half")
-        return FindPoisonBottle(bottles[:halfway], numStrips - 1, numDays + 7)
-    } else {
-        fmt.Println("Check right half")
-        res, newNumDays, err := FindPoisonBottle(
-            bottles[halfway:],
-            numStrips - 1,
-            numDays + 7,
-        )
-        return res + halfway, newNumDays, err
+    for indexCopy > 0 {
+        if indexCopy & 1 == 1 {
+            results[stripIndex] = (
+                results[stripIndex] || bottles[bottleIndex])
+        }
+        indexCopy >>= 1
+        stripIndex++
     }
 }
 
-// Test a single bottle for poison.
-func TestPoison(bottles []bool) bool {
-    for i := range bottles {
-        if bottles[i] {
-            return true
+// Get the bottle number from a the results.
+func getBottleIndex(results []bool) int {
+    mask := 1
+    bottleIndex := 0
+
+    for i := range results {
+        if results[i] {
+            bottleIndex += mask
         }
+        mask <<= 1
     }
 
-    return false
+    return bottleIndex
 }
