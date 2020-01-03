@@ -33,6 +33,24 @@ const (
 	Draw
 )
 
+// Represents a direction of movement on the board.
+type Direction int
+
+const (
+	Up = iota
+	UpRight
+	Right
+	DownRight
+	Down
+	DownLeft
+	Left
+	UpLeft
+)
+
+var Directions = [...]Direction{
+	Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft,
+}
+
 // Represents a piece placed on the board. A piece shows either white or black
 // as its colour at any one time, but may be flipped to show the opposite
 // colour.
@@ -130,7 +148,7 @@ func (board *Board) PlayGame() {
 		currPlayer := board.players[board.currTurn]
 		currColour := board.getCurrColour()
 		nextMove := currPlayer.ChooseMove(board)
-		board.PlacePiece(nextMove, currColour)
+		board.placePiece(nextMove, currColour)
 
 		if board.NoMovesPossible(currColour) {
 			board.status = board.GetGameResult()
@@ -138,6 +156,33 @@ func (board *Board) PlayGame() {
 			board.currTurn = (board.currTurn + 1) % 2
 		}
 	}
+
+	board.Display()
+	board.printStatus()
+}
+
+// Validate a move.
+func (board *Board) ValidMove(move Coords, colour Colour) bool {
+	// Bounds checking.
+	if !board.checkBounds(move) {
+		return false
+	}
+
+	// Check if space is occupied by another piece.
+	if board.grid[move.y][move.x] != nil {
+		return false
+	}
+
+	// Check if placing a piece here will form a terminated run of the opposite
+	// colour in any direction.
+	for i := range Directions {
+		if board.runExists(move, colour, Directions[i]) {
+			return true
+		}
+	}
+
+	// No run exists, so not a valid move.
+	return false
 }
 
 // Get the colour of the current player.
@@ -155,7 +200,7 @@ func (board *Board) getCurrColour() Colour {
 }
 
 // Place a new piece on the board.
-func (board *Board) PlacePiece(nextMove Coords, colour Colour) {
+func (board *Board) placePiece(nextMove Coords, colour Colour) {
 	// The move should have already been validated, but check again for sanity.
 	if !board.ValidMove(nextMove, colour) {
 		panic("Invalid move")
@@ -163,25 +208,76 @@ func (board *Board) PlacePiece(nextMove Coords, colour Colour) {
 
 	piece := &Piece{colour: colour, position: nextMove}
 	board.grid[nextMove.y][nextMove.x] = piece
+	board.flipAllRuns(piece)
 }
 
-// Validate a move.
-func (board *Board) ValidMove(move Coords, colour Colour) bool {
-	// Bounds checking.
-	if move.y < 0 || move.y > len(board.grid) {
+// Flip all pieces of opposite colour that form terminated runs adjacent to
+// this new piece.
+func (board *Board) flipAllRuns(piece *Piece) {
+	for i := range Directions {
+		if board.runExists(piece.position, piece.colour, Directions[i]) {
+			board.flipRun(piece.position, piece.colour, Directions[i])
+		}
+	}
+}
+
+// Flip all consecutive pieces of the opposite colour in a given direction.
+func (board *Board) flipRun(
+	position Coords, colour Colour, direction Direction,
+) {
+	position = position.MoveDirection(direction)
+	piece := board.grid[position.y][position.x]
+
+	for piece.colour != colour {
+		piece.colour = colour
+		position = position.MoveDirection(direction)
+		piece = board.grid[position.y][position.x]
+	}
+}
+
+// Check if a given position is within the grid boundaries.
+func (board *Board) checkBounds(position Coords) bool {
+	if position.y < 0 || position.y >= len(board.grid) {
 		return false
 	}
 
-	if move.x < 0 || move.x > len(board.grid[0]) {
+	if position.x < 0 || position.x >= len(board.grid[0]) {
 		return false
 	}
 
-	if board.grid[move.y][move.x] != nil {
-		return false
-	}
-
-	// TODO
 	return true
+}
+
+// Check if one or more pieces of opposite colour exist in a given direction,
+// terminated by a piece of our colour.
+func (board *Board) runExists(
+	move Coords, colour Colour, direction Direction,
+) bool {
+	// First check if our immediate neighbour is a piece of the opposite
+	// colour. If not, there is no run so return false.
+	position := move.MoveDirection(direction)
+	if !board.checkBounds(position) {
+		return false
+	}
+
+	piece := board.grid[position.y][position.x]
+	if piece == nil || piece.colour == colour {
+		return false
+	}
+
+	// Now, iterate in that direction until we reach either a blank space or
+	// a piece of our colour.
+	for piece != nil && piece.colour != colour {
+		position = position.MoveDirection(direction)
+		if !board.checkBounds(position) {
+			return false
+		}
+		piece = board.grid[position.y][position.x]
+	}
+
+	// If piece is non-nil, it must be of the opposite colour so we have
+	// found a run.
+	return piece != nil
 }
 
 // Return true if no more moves are possible for the current colour.
@@ -225,6 +321,23 @@ func (board *Board) GetGameResult() GameStatus {
 	}
 }
 
+// At the end of a game, print the final outcome.
+func (board *Board) printStatus() {
+	switch board.status {
+	case BlackWin:
+		fmt.Printf("Black player %v wins!\n", board.players[0].Name())
+
+	case WhiteWin:
+		fmt.Printf("White player %v wins!\n", board.players[1].Name())
+
+	case Draw:
+		fmt.Println("It's a draw!")
+
+	default:
+		panic("Unexpected game status")
+	}
+}
+
 // Initialise a new player, prompting to enter their name.
 func InitHumanPlayer(colour Colour) HumanPlayer {
 	fmt.Printf(
@@ -249,8 +362,9 @@ func (player HumanPlayer) Name() string {
 // Return a valid next move for this player.
 func (player HumanPlayer) ChooseMove(board *Board) Coords {
 	fmt.Printf(
-		"%v: your turn, please enter coords of next move.\n",
+		"%v (%v): your turn, please enter coords of next move.\n",
 		player.name,
+		player.colour.DisplayName(),
 	)
 
 	nextMove := player.getCoordsInput()
@@ -267,7 +381,7 @@ func (player HumanPlayer) getCoordsInput() Coords {
 	row := player.getIntInput("row: ")
 	col := player.getIntInput("col: ")
 
-	return Coords{x: row, y: col}
+	return Coords{x: col, y: row}
 }
 
 // Get an integer input from a human player.
@@ -324,5 +438,39 @@ func (colour Colour) DisplayName() string {
 
 	default:
 		panic("Unexpected colour")
+	}
+}
+
+// Return the next consecutive position in the given direction. Note: bounds
+// checking is not performed here, so it is up to the caller to check if the
+// position is within the grid or not.
+func (position Coords) MoveDirection(direction Direction) Coords {
+	switch direction {
+	case Up:
+		return Coords{x: position.x, y: position.y - 1}
+
+	case UpRight:
+		return Coords{x: position.x + 1, y: position.y - 1}
+
+	case Right:
+		return Coords{x: position.x + 1, y: position.y}
+
+	case DownRight:
+		return Coords{x: position.x + 1, y: position.y + 1}
+
+	case Down:
+		return Coords{x: position.x, y: position.y + 1}
+
+	case DownLeft:
+		return Coords{x: position.x - 1, y: position.y + 1}
+
+	case Left:
+		return Coords{x: position.x - 1, y: position.y}
+
+	case UpLeft:
+		return Coords{x: position.x - 1, y: position.y - 1}
+
+	default:
+		panic("Unexpected direction.")
 	}
 }
