@@ -2,16 +2,18 @@ package main
 
 import (
 	"bufio"
+	crypto_rand "crypto/rand"
+	"encoding/binary"
 	"errors"
 	"fmt"
-	"math/rand"
+	math_rand "math/rand"
 	"os"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	game := InitGame(8, 4)
+	game := InitGame(10, 6)
 	game.Play()
 }
 
@@ -206,8 +208,8 @@ func InitGrid(size, numBombs int) Grid {
 
 	bombsPlaced := 0
 	for bombsPlaced != numBombs {
-		row := rand.Intn(size)
-		col := rand.Intn(size)
+		row := math_rand.Intn(size)
+		col := math_rand.Intn(size)
 		if grid[row][col]&Bomb == 0 {
 			grid[row][col] |= Bomb
 			bombsPlaced++
@@ -375,4 +377,15 @@ func getIntInput(prompt string) int {
 	}
 
 	return intInput
+}
+
+// Seed the RNG so that different results are produced each time.
+func seedRng() {
+	var b [8]byte
+	_, err := crypto_rand.Read(b[:])
+	if err != nil {
+		panic("Cannot send RNG")
+	}
+
+	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 }
