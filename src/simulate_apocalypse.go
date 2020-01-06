@@ -1,16 +1,15 @@
 package main
 
 import (
-	crypto_rand "crypto/rand"
-	"encoding/binary"
+	"ctci"
 	"fmt"
-	math_rand "math/rand"
+	"math/rand"
 )
 
 const NUM_TRIALS = 1000000
 
 func main() {
-	seedRng()
+	ctci.SeedRng()
 
 	results := make([]int, NUM_TRIALS)
 	for i := 0; i < NUM_TRIALS; i++ {
@@ -24,21 +23,10 @@ func main() {
 	)
 }
 
-// Seed the RNG so that different results are produced each time.
-func seedRng() {
-	var b [8]byte
-	_, err := crypto_rand.Read(b[:])
-	if err != nil {
-		panic("Cannot send RNG")
-	}
-
-	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
-}
-
 // Simulate how many boys are had for one girl.
 func simulateChildren() int {
 	numBoys := 0
-	for math_rand.Float64() < 0.5 {
+	for rand.Float64() < 0.5 {
 		numBoys++
 	}
 

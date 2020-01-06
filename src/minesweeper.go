@@ -2,26 +2,29 @@ package main
 
 import (
 	"bufio"
-	crypto_rand "crypto/rand"
-	"encoding/binary"
+	"ctci"
 	"errors"
 	"fmt"
-	math_rand "math/rand"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 )
 
+// Seend the RNG and play a new game.
 func main() {
+	ctci.SeedRng()
 	game := InitGame(10, 6)
 	game.Play()
 }
 
+// Represents all game state.
 type Game struct {
 	grid   Grid
 	status GameStatus
 }
 
+// A game can either be in progres, or finished in a win or lose state.
 type GameStatus int
 
 const (
@@ -30,6 +33,7 @@ const (
 	GameLost
 )
 
+// Every turn, the user may take one of two actions: explore or flag.
 type GameAction int
 
 const (
@@ -39,24 +43,8 @@ const (
 
 type Grid [][]Cell
 
-// Represents a direction of movement on the grid.
-type Direction int
-
-const (
-	Up = iota
-	UpRight
-	Right
-	DownRight
-	Down
-	DownLeft
-	Left
-	UpLeft
-)
-
-var Directions = [...]Direction{
-	Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft,
-}
-
+// Each cell in the grid may be in a combination of states. We use bitflags
+// to store the states, we could have also stored a struct of bools.
 type Cell int
 
 const (
@@ -78,8 +66,8 @@ func (game Game) Play() {
 	for game.status == InProgress {
 		game.display()
 		action := promptAction()
-		row, col := game.getRowColInput()
-		game.applyAction(action, row, col)
+		coords := game.getCoordsInput()
+		game.applyAction(action, coords)
 		game.status = game.getStatus()
 	}
 
@@ -103,7 +91,9 @@ func (game Game) display() {
 		builder.WriteRune(' ')
 
 		for col := range game.grid[row] {
-			builder.WriteRune(game.grid.CellChar(row, col))
+			builder.WriteRune(game.grid.CellChar(
+				ctci.GridCoords{Row: row, Col: col},
+			))
 			builder.WriteRune(' ')
 		}
 		builder.WriteRune('\n')
@@ -113,35 +103,32 @@ func (game Game) display() {
 }
 
 // Get a valid row and column input from the user.
-func (game Game) getRowColInput() (int, int) {
-	row, col := promptRowCol()
-	for !game.grid.validRowCol(row, col) ||
-		game.grid[row][col]&Explored != 0 {
+func (game Game) getCoordsInput() ctci.GridCoords {
+	coords := promptCoords()
+	for !game.grid.validCoords(coords) ||
+		game.grid[coords.Row][coords.Col]&Explored != 0 {
 		fmt.Println("Invalid row/col, try again.")
-		row, col = promptRowCol()
+		coords = promptCoords()
 	}
 
-	return row, col
+	return coords
 }
 
 // Apply a game action to a specified cell.
-func (game Game) applyAction(action GameAction, row, col int) {
+func (game Game) applyAction(action GameAction, coords ctci.GridCoords) {
 	switch action {
 	case Explore:
-		game.grid[row][col] |= Explored
-		if game.grid[row][col]&Bomb != 0 {
-			game.status = GameLost
-		} else {
-			if game.grid.countNeighbourBombs(row, col) == 0 {
-				game.exploreNeighbours(row, col)
-			}
+		game.grid[coords.Row][coords.Col] |= Explored
+		if game.grid[coords.Row][coords.Col]&Bomb == 0 &&
+			game.grid.countNeighbourBombs(coords) == 0 {
+			game.exploreNeighbours(coords)
 		}
 
 	case Flag:
-		if game.grid[row][col]&Flagged == 0 {
-			game.grid[row][col] |= Flagged
+		if game.grid[coords.Row][coords.Col]&Flagged == 0 {
+			game.grid[coords.Row][coords.Col] |= Flagged
 		} else {
-			game.grid[row][col] &= ^Flagged
+			game.grid[coords.Row][coords.Col] &= ^Flagged
 		}
 
 	default:
@@ -150,12 +137,12 @@ func (game Game) applyAction(action GameAction, row, col int) {
 }
 
 // Explore all neighbours, when it is known there are no bombs.
-func (game Game) exploreNeighbours(row, col int) {
-	for i := range Directions {
-		newRow, newCol := game.grid.Move(row, col, Directions[i])
-		if game.grid.validRowCol(newRow, newCol) &&
-			game.grid[newRow][newCol]&Explored == 0 {
-			game.applyAction(Explore, newRow, newCol)
+func (game Game) exploreNeighbours(coords ctci.GridCoords) {
+	for i := range ctci.GridDirections {
+		newCoords := coords.MoveDirection(ctci.GridDirections[i])
+		if game.grid.validCoords(newCoords) &&
+			game.grid[newCoords.Row][newCoords.Col]&Explored == 0 {
+			game.applyAction(Explore, newCoords)
 		}
 	}
 }
@@ -208,8 +195,8 @@ func InitGrid(size, numBombs int) Grid {
 
 	bombsPlaced := 0
 	for bombsPlaced != numBombs {
-		row := math_rand.Intn(size)
-		col := math_rand.Intn(size)
+		row := rand.Intn(size)
+		col := rand.Intn(size)
 		if grid[row][col]&Bomb == 0 {
 			grid[row][col] |= Bomb
 			bombsPlaced++
@@ -220,12 +207,12 @@ func InitGrid(size, numBombs int) Grid {
 }
 
 // Check if row and column indices are valid.
-func (grid Grid) validRowCol(row, col int) bool {
-	if row < 0 || row >= len(grid) {
+func (grid Grid) validCoords(coords ctci.GridCoords) bool {
+	if coords.Row < 0 || coords.Row >= len(grid) {
 		return false
 	}
 
-	if col < 0 || col >= len(grid[0]) {
+	if coords.Col < 0 || coords.Col >= len(grid[0]) {
 		return false
 	}
 
@@ -233,13 +220,13 @@ func (grid Grid) validRowCol(row, col int) bool {
 }
 
 // Return a character to represent a cell in the grid.
-func (grid Grid) CellChar(row, col int) rune {
-	cell := grid[row][col]
+func (grid Grid) CellChar(coords ctci.GridCoords) rune {
+	cell := grid[coords.Row][coords.Col]
 	if cell&Explored != 0 {
 		if cell&Bomb != 0 {
 			return 'X'
 		} else {
-			neighbourBombs := grid.countNeighbourBombs(row, col)
+			neighbourBombs := grid.countNeighbourBombs(coords)
 			if neighbourBombs == 0 {
 				return ' '
 			} else {
@@ -256,49 +243,18 @@ func (grid Grid) CellChar(row, col int) rune {
 }
 
 // Count the number of neighbouring bombs.
-func (grid Grid) countNeighbourBombs(row, col int) int {
+func (grid Grid) countNeighbourBombs(coords ctci.GridCoords) int {
 	bombCount := 0
 
-	for i := range Directions {
-		newRow, newCol := grid.Move(row, col, Directions[i])
-		if grid.validRowCol(newRow, newCol) && grid[newRow][newCol]&Bomb != 0 {
+	for i := range ctci.GridDirections {
+		newCoords := coords.MoveDirection(ctci.GridDirections[i])
+		if grid.validCoords(newCoords) &&
+			grid[newCoords.Row][newCoords.Col]&Bomb != 0 {
 			bombCount++
 		}
 	}
 
 	return bombCount
-}
-
-// Return the row/col indices of the adjacent cell in a given direction.
-func (grid Grid) Move(row, col int, direction Direction) (int, int) {
-	switch direction {
-	case Up:
-		return row - 1, col
-
-	case UpRight:
-		return row - 1, col + 1
-
-	case Right:
-		return row, col + 1
-
-	case DownRight:
-		return row + 1, col + 1
-
-	case Down:
-		return row + 1, col
-
-	case DownLeft:
-		return row + 1, col - 1
-
-	case Left:
-		return row, col - 1
-
-	case UpLeft:
-		return row - 1, col - 1
-
-	default:
-		panic("Unexpected direction.")
-	}
 }
 
 // Convert an input string to an Action value.
@@ -348,12 +304,12 @@ func promptAction() GameAction {
 }
 
 // Prompt for user to enter a row and column
-func promptRowCol() (int, int) {
+func promptCoords() ctci.GridCoords {
 	fmt.Println("Enter row and column:")
 	row := getIntInput("row:\n> ")
 	col := getIntInput("col:\n> ")
 
-	return row, col
+	return ctci.GridCoords{Row: row, Col: col}
 }
 
 // Get an integer input from user.
@@ -377,15 +333,4 @@ func getIntInput(prompt string) int {
 	}
 
 	return intInput
-}
-
-// Seed the RNG so that different results are produced each time.
-func seedRng() {
-	var b [8]byte
-	_, err := crypto_rand.Read(b[:])
-	if err != nil {
-		panic("Cannot send RNG")
-	}
-
-	math_rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 }
