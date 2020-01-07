@@ -69,3 +69,51 @@ func TestFileTree(t *testing.T) {
 		}
 	}
 }
+
+// Test setting, getting and deleting values in the hash table.
+func TestHashTable(t *testing.T) {
+	table := InitHashTable(10)
+
+	// Try to get value from empty table.
+	_, err := table.GetItem(9)
+	if err == nil {
+		t.Error(err)
+	}
+
+	// Set a key and check it can be retrieved.
+	table.SetItem(25, "Hello, world")
+
+	val, err := table.GetItem(25)
+	checkValAndErr(t, "Hello, world", val.(string), err)
+
+	// Set a key with the same hash and check it can still be retrieved.
+	table.SetItem(55, "Another string")
+	val, err = table.GetItem(55)
+	checkValAndErr(t, "Another string", val.(string), err)
+
+	// Try updating an existing key.
+	table.SetItem(25, "and it's gone")
+	val, err = table.GetItem(25)
+	checkValAndErr(t, "and it's gone", val.(string), err)
+
+	// Finally, delete the key and check it cannot be retrieved.
+	err = table.Delete(25)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = table.GetItem(25)
+	if err == nil {
+		t.Error()
+	}
+}
+
+// Check there is no error and the value matches what is expected.
+func checkValAndErr(t *testing.T, expected, actual string, err error) {
+	if err != nil {
+		t.Error(err)
+	}
+	if actual != expected {
+		t.Error(actual)
+	}
+}

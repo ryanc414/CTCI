@@ -1,6 +1,7 @@
 package ctci
 
 import (
+	"container/list"
 	crypto_rand "crypto/rand"
 	"encoding/binary"
 	"errors"
@@ -233,4 +234,79 @@ func (dir *FileTreeDir) DeleteDir(name string) error {
 
 	delete(dir.childFiles, name)
 	return nil
+}
+
+// Implement hash table with linked lists for collisions.
+
+// This table will be super simple and store integers only. Integers will be
+// "hashed" into n buckets by simple modulus. Within each bucket there will
+// be a linked list of values.
+type HashTable []*list.List
+
+type HashTableNode struct {
+	key   int
+	value interface{}
+}
+
+func InitHashTable(numBuckets int) HashTable {
+	hashTable := make([]*list.List, numBuckets)
+	for i := range hashTable {
+		hashTable[i] = list.New()
+	}
+
+	return hashTable
+}
+
+// Insert or update a key-value pair into the hash table.
+func (table HashTable) SetItem(key int, value interface{}) {
+	hash := table.hash(key)
+	bucket := table[hash]
+
+	// First, delete any existing item in the hash bucket.
+	for el := bucket.Front(); el != nil; el = el.Next() {
+		node := el.Value.(HashTableNode)
+		if node.key == key {
+			bucket.Remove(el)
+			break
+		}
+	}
+
+	newNode := HashTableNode{key: key, value: value}
+	table[hash].PushFront(newNode)
+}
+
+// Get a value from the hash table given its key.
+func (table HashTable) GetItem(key int) (interface{}, error) {
+	hash := table.hash(key)
+	bucket := table[hash]
+
+	for el := bucket.Front(); el != nil; el = el.Next() {
+		node := el.Value.(HashTableNode)
+		if node.key == key {
+			return node.value, nil
+		}
+	}
+
+	return nil, errors.New("Not found")
+}
+
+// Delete a key from the hash table.
+func (table HashTable) Delete(key int) error {
+	hash := table.hash(key)
+	bucket := table[hash]
+
+	for el := bucket.Front(); el != nil; el = el.Next() {
+		node := el.Value.(HashTableNode)
+		if node.key == key {
+			bucket.Remove(el)
+			return nil
+		}
+	}
+
+	return errors.New("Not found")
+}
+
+// Hash a key, returning an inteter n where 0 < n <= size of hash table.
+func (table HashTable) hash(key int) int {
+	return key % len(table)
 }
