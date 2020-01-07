@@ -124,6 +124,10 @@ func (position GridCoords) MoveDirection(direction GridDirection) GridCoords {
 	}
 }
 
+// Filesystem nodes and methods. This is only a very basic gist, a real
+// filesystem would provide methods for copying and moving files, some helpers
+// for iterating the filesystem, and support for symbolic links.
+
 // Represent a directory in an in-memory file system.
 type FileTreeDir struct {
 	name       string
@@ -137,6 +141,15 @@ type FileTreeFile struct {
 	name      string
 	parentDir *FileTreeDir
 	data      []byte
+}
+
+// Create the root directory.
+func CreateRootDir(name string) *FileTreeDir {
+	return &FileTreeDir{
+		name:       name,
+		childDirs:  make(map[string]*FileTreeDir),
+		childFiles: make(map[string]*FileTreeFile),
+	}
 }
 
 // Create a new file under an existing directory.
@@ -158,14 +171,15 @@ func (dir *FileTreeDir) CreateFile(
 }
 
 // Create a new dir under an existing directory.
-func (dir *FileTreeDir) CreateDir(name string) *FileTreeDir {
-	newDir := &FileTreeDir{
-		name:       name,
-		childDirs:  make(map[string]*FileTreeDir),
-		childFiles: make(map[string]*FileTreeFile),
+func (dir *FileTreeDir) CreateDir(name string) (*FileTreeDir, error) {
+	_, ok := dir.childDirs[name]
+	if ok {
+		return nil, errors.New("Dir already exists")
 	}
+
+	newDir := CreateRootDir(name)
 	dir.childDirs[name] = newDir
-	return newDir
+	return newDir, nil
 }
 
 // List directory contents: the names of all directories and files.
