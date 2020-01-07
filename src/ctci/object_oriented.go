@@ -3,6 +3,7 @@ package ctci
 import (
 	crypto_rand "crypto/rand"
 	"encoding/binary"
+	"errors"
 	math_rand "math/rand"
 )
 
@@ -121,4 +122,101 @@ func (position GridCoords) MoveDirection(direction GridDirection) GridCoords {
 	default:
 		panic("Unexpected direction.")
 	}
+}
+
+// Represent a directory in an in-memory file system.
+type FileTreeDir struct {
+	name       string
+	parentDir  *FileTreeDir
+	childDirs  map[string]*FileTreeDir
+	childFiles map[string]*FileTreeFile
+}
+
+// Represent a file in an in-memory file system.
+type FileTreeFile struct {
+	name      string
+	parentDir *FileTreeDir
+	data      []byte
+}
+
+// Create a new file under an existing directory.
+func (dir *FileTreeDir) CreateFile(
+	name string, data []byte,
+) (*FileTreeFile, error) {
+	if dir.childFiles[name] != nil {
+		return nil, errors.New("Filename already exists")
+	}
+
+	newFile := &FileTreeFile{
+		name: name,
+		data: data,
+	}
+
+	dir.childFiles[name] = newFile
+
+	return newFile, nil
+}
+
+// Create a new dir under an existing directory.
+func (dir *FileTreeDir) CreateDir(name string) *FileTreeDir {
+	newDir := &FileTreeDir{
+		name:       name,
+		childDirs:  make(map[string]*FileTreeDir),
+		childFiles: make(map[string]*FileTreeFile),
+	}
+	dir.childDirs[name] = newDir
+	return newDir
+}
+
+// List directory contents: the names of all directories and files.
+func (dir *FileTreeDir) List() []string {
+	numDirs := len(dir.childDirs)
+	numFiles := len(dir.childFiles)
+	names := make([]string, 0, numDirs+numFiles)
+
+	for i := range dir.childDirs {
+		names = append(names, dir.childDirs[i].name)
+	}
+
+	for i := range dir.childFiles {
+		names = append(names, dir.childFiles[i].name)
+	}
+
+	return names
+}
+
+// Delete a file from a dir.
+func (dir *FileTreeDir) DeleteFile(name string) error {
+	_, ok := dir.childFiles[name]
+	if !ok {
+		return errors.New("No such file")
+	}
+
+	delete(dir.childFiles, name)
+	return nil
+}
+
+// Delete a directory from a dir.
+func (dir *FileTreeDir) DeleteDir(name string) error {
+	childDir, ok := dir.childDirs[name]
+	if !ok {
+		return errors.New("No such dir")
+	}
+
+	for k := range childDir.childFiles {
+		err := childDir.DeleteFile(k)
+		if err != nil {
+			return err
+		}
+	}
+
+	for k := range childDir.childDirs {
+		err := childDir.DeleteDir(k)
+		if err != nil {
+			return err
+		}
+	}
+
+	delete(dir.childFiles, name)
+	return nil
 }
