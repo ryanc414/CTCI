@@ -125,3 +125,29 @@ func (grid RobotGrid) validCoords(coords GridCoords) bool {
 
 	return true
 }
+
+// Finds a "magic" index in a sorted array where A[i] == i, if one exists.
+func FindMagicIndex(sortedArr []int) (int, error) {
+	return findMagicIndexRecur(sortedArr, 0)
+}
+
+func findMagicIndexRecur(sortedArr []int, offset int) (int, error) {
+	// Base case: return error for empty slice.
+	if len(sortedArr) == 0 {
+		return 0, errors.New("No magic index found.")
+	}
+
+	middle := (len(sortedArr) - 1) / 2
+	midVal := sortedArr[middle]
+
+	switch {
+	case midVal == middle+offset:
+		return midVal, nil
+
+	case midVal > middle+offset:
+		return findMagicIndexRecur(sortedArr[:middle], offset)
+
+	default:
+		return findMagicIndexRecur(sortedArr[middle+1:], offset+middle+1)
+	}
+}

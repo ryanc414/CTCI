@@ -91,3 +91,30 @@ func compareRobotPaths(actual, expected RobotPath) bool {
 
 	return true
 }
+
+// Test finding "magic" indices in arrays.
+func TestMagicIndex(t *testing.T) {
+	arr := []int{0, 1, 2, 3, 4}
+	val, err := FindMagicIndex(arr)
+	if err != nil {
+		t.Error(err)
+	}
+	if val != 2 {
+		t.Error(val)
+	}
+
+	arr = []int{-10, -5, 0, 3, 10}
+	val, err = FindMagicIndex(arr)
+	if err != nil {
+		t.Error(err)
+	}
+	if val != 3 {
+		t.Error(val)
+	}
+
+	arr = []int{20, 40, 60, 80, 100}
+	val, err = FindMagicIndex(arr)
+	if err == nil {
+		t.Error(val)
+	}
+}
