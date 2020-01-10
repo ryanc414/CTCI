@@ -1,6 +1,9 @@
 package ctci
 
-import "testing"
+import (
+	"sort"
+	"testing"
+)
 
 // Test calculating the number of step ways recursively and iteratively.
 func TestNumStepWays(t *testing.T) {
@@ -117,4 +120,57 @@ func TestMagicIndex(t *testing.T) {
 	if err == nil {
 		t.Error(val)
 	}
+}
+
+// Test finding all subsets of a set.
+func TestPowerSet(t *testing.T) {
+	// First test the empty set.
+	subsets := PowerSet("")
+	if subsets != nil {
+		t.Error(subsets)
+	}
+
+	// Now test a set of four values.
+	set := "1234"
+	expectedSubsets := []string{
+		"1234",
+		"234",
+		"134",
+		"124",
+		"123",
+		"12",
+		"13",
+		"14",
+		"23",
+		"24",
+		"34",
+		"1",
+		"2",
+		"3",
+		"4",
+	}
+
+	subsets = PowerSet(set)
+	if !compareSubsets(subsets, expectedSubsets) {
+		t.Error(subsets)
+	}
+}
+
+// Compare a slice of subsets with what is expected.
+func compareSubsets(subsets, expectedSubsets []string) bool {
+	if len(subsets) != len(expectedSubsets) {
+		return false
+	}
+
+	// Sort both slices before comparing, since the order is not important.
+	sort.Strings(subsets)
+	sort.Strings(expectedSubsets)
+
+	for i := range subsets {
+		if subsets[i] != expectedSubsets[i] {
+			return false
+		}
+	}
+
+	return true
 }

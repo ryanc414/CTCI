@@ -1,6 +1,9 @@
 package ctci
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 // Calculate the number of ways of navigating a fixed number of steps in
 // jumps of 1, 2 and 3 only.
@@ -150,4 +153,36 @@ func findMagicIndexRecur(sortedArr []int, offset int) (int, error) {
 	default:
 		return findMagicIndexRecur(sortedArr[middle+1:], offset+middle+1)
 	}
+}
+
+// Finds all subsets of a set.
+func PowerSet(set string) []string {
+	cache := make(map[string]bool)
+
+	// Note: could optimize by pre-allocating the slice of strings up front.
+	return powerSetRecur(set, cache)
+}
+
+func powerSetRecur(set string, cache map[string]bool) []string {
+	// Base case: empty set.
+	if len(set) == 0 {
+		return nil
+	}
+
+	// Check if this set has already been found, if so we skip.
+	if _, ok := cache[set]; ok {
+		return nil
+	}
+
+	cache[set] = true
+
+	sets := []string{set}
+	for i := range set {
+		var builder strings.Builder
+		builder.WriteString(set[:i])
+		builder.WriteString(set[i+1:])
+		sets = append(sets, powerSetRecur(builder.String(), cache)...)
+	}
+
+	return sets
 }
