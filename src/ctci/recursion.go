@@ -2,6 +2,7 @@ package ctci
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -185,4 +186,140 @@ func powerSetRecur(set string, cache map[string]bool) []string {
 	}
 
 	return sets
+}
+
+// Multiply two positive integers recursively, without using the * operator.
+func MultiplyRecur(a, b int) int {
+	if a < 0 || b < 0 {
+		panic("Expect positive integers")
+	}
+
+	if a == 0 || b == 0 {
+		return 0
+	}
+
+	return a + MultiplyRecur(a, b-1)
+}
+
+// Represent the Towers of Hanoi by an array of three stacks.
+type TowersOfHanoi struct {
+	stacks    [3]Stack
+	numPieces int
+}
+
+// Initialise the towers of Hanoi with a given number of pieces on the left
+// tower.
+func InitTowersOfHanoi(numPieces int) TowersOfHanoi {
+	var towers TowersOfHanoi
+
+	// Initialise three stacks.
+	for i := 0; i < 3; i++ {
+		towers.stacks[i] = NewBasicStack()
+	}
+
+	// Place pieces on the left stack.
+	for i := numPieces; i > 0; i-- {
+		towers.stacks[0].Push(i)
+	}
+
+	towers.numPieces = numPieces
+	return towers
+}
+
+// Solve the towers of hanoi, by moving all pieces from the left tower onto
+// the right without placing a bigger piece on top of a smaller one.
+func (towers TowersOfHanoi) Solve() {
+	//towers.Display()
+	towers.solveTowersRecur(0, 1, 2, towers.numPieces)
+}
+
+// Recursive implementation.
+func (towers TowersOfHanoi) solveTowersRecur(
+	tower0, tower1, tower2, numPieces int,
+) {
+	if numPieces == 1 {
+		towers.movePiece(tower0, tower2)
+		return
+	}
+
+	towers.solveTowersRecur(tower0, tower2, tower1, numPieces-1)
+	towers.movePiece(tower0, tower2)
+	towers.solveTowersRecur(tower1, tower0, tower2, numPieces-1)
+}
+
+// Move a piece from one tower to another.
+func (towers TowersOfHanoi) movePiece(fromTower, toTower int) {
+	piece, err := towers.stacks[fromTower].Pop()
+	if err != nil {
+		panic(err)
+	}
+
+	// Check that we are placing onto a larger piece, or the base.
+	onPiece, err := towers.stacks[toTower].Peek()
+	if err == nil && onPiece.(int) < piece.(int) {
+		panic("Cannot move bigger piece onto smaller one.")
+	}
+
+	towers.stacks[toTower].Push(piece)
+	//towers.Display()
+}
+
+// Format and print the towers to stdout.
+func (towers TowersOfHanoi) Display() {
+	maxTowerSize := 0
+	for i := range towers.stacks {
+		towerSize := len(towers.stacks[i].(*basicStack).data)
+		if towerSize > maxTowerSize {
+			maxTowerSize = towerSize
+		}
+	}
+
+	var builder strings.Builder
+
+	divLine := makeDivLine()
+
+	for i := maxTowerSize - 1; i >= 0; i-- {
+		for j := range towers.stacks {
+			stackData := towers.stacks[j].(*basicStack).data
+			if i < len(stackData) {
+				builder.WriteString(renderPiece(stackData[i].(int)))
+			} else {
+				builder.WriteString(renderPiece(0))
+			}
+		}
+		builder.WriteRune('\n')
+	}
+	builder.WriteString(divLine)
+	builder.WriteRune('\n')
+	fmt.Println(builder.String())
+}
+
+func makeDivLine() string {
+	divLine := make([]byte, 6*2*3)
+	for i := range divLine {
+		divLine[i] = '_'
+	}
+
+	return string(divLine)
+}
+
+// Return a string representation of a tower piece.
+func renderPiece(pieceNum int) string {
+	maxSize := 5
+	if pieceNum > maxSize {
+		panic("Cannot render piece")
+	}
+
+	stringSize := 2*maxSize + 1
+	pieceString := make([]byte, stringSize)
+	for i := range pieceString {
+		pieceString[i] = ' '
+	}
+
+	for j := 0; j < pieceNum; j++ {
+		pieceString[maxSize+j] = 'X'
+		pieceString[maxSize-j] = 'X'
+	}
+
+	return string(pieceString)
 }

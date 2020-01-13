@@ -174,3 +174,30 @@ func compareSubsets(subsets, expectedSubsets []string) bool {
 
 	return true
 }
+
+// Test solving the towers of Hanoi.
+func TestTowersOfHanoi(t *testing.T) {
+	numPieces := 5
+	tower := InitTowersOfHanoi(numPieces)
+	tower.Solve()
+
+	// Check that the first two towers are both empty.
+	for i := 0; i < 2; i++ {
+		if !tower.stacks[i].IsEmpty() {
+			t.Error(i)
+		}
+	}
+
+	// Check that all pieces are in the correct order on the last tower.
+	for i := 1; i < numPieces+1; i++ {
+		val, err := tower.stacks[2].Pop()
+		if err != nil {
+			t.Error(err)
+			break
+		}
+
+		if val.(int) != i {
+			t.Error(val)
+		}
+	}
+}
