@@ -323,3 +323,32 @@ func renderPiece(pieceNum int) string {
 
 	return string(pieceString)
 }
+
+func Permutations(input string) []string {
+	if len(input) == 0 {
+		return nil
+	}
+
+	if len(input) == 1 {
+		return []string{input}
+	}
+
+	head := input[0]
+	tail := input[1:]
+	tailPerms := Permutations(tail)
+	var perms []string
+
+	for i := range tailPerms {
+		tailPerm := tailPerms[i]
+
+		for j := 0; j <= len(tailPerm); j++ {
+			var builder strings.Builder
+			builder.WriteString(tailPerm[:j])
+			builder.WriteByte(head)
+			builder.WriteString(tailPerm[j:])
+			perms = append(perms, builder.String())
+		}
+	}
+
+	return perms
+}

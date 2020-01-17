@@ -201,3 +201,27 @@ func TestTowersOfHanoi(t *testing.T) {
 		}
 	}
 }
+
+// Calculate permutations of a string with unique chars.
+func TestPermutations(t *testing.T) {
+	perms := Permutations("abc")
+	expectedPerms := []string{
+		"abc",
+		"bac",
+		"bca",
+		"acb",
+		"cab",
+		"cba",
+	}
+
+	if len(perms) != len(expectedPerms) {
+		t.Error(perms)
+	} else {
+		for i := range perms {
+			if perms[i] != expectedPerms[i] {
+				t.Error(perms)
+				break
+			}
+		}
+	}
+}
