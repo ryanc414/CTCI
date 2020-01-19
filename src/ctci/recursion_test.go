@@ -370,3 +370,11 @@ func TestCoins(t *testing.T) {
 		t.Error(numCombos)
 	}
 }
+
+// Test finding the number of ways to place 8 Queens
+func TestEightQueens(t *testing.T) {
+	queenPositions := PlaceEightQueens()
+	if len(queenPositions) != 92 {
+		t.Error(queenPositions)
+	}
+}

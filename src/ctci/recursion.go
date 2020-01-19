@@ -504,3 +504,50 @@ func numCoinCombosRecur(value int, coinVals []int) int {
 
 	return numCombos
 }
+
+func PlaceEightQueens() [][]GridCoords {
+	return placeQueensRecur(nil)
+}
+
+func placeQueensRecur(placedQueens []GridCoords) [][]GridCoords {
+	row := len(placedQueens)
+
+	if row == 8 {
+		return [][]GridCoords{placedQueens}
+	}
+
+	var places [][]GridCoords
+	for col := 0; col < 8; col++ {
+		pos := GridCoords{Row: row, Col: col}
+		if checkQueens(placedQueens, pos) {
+			newPlacedQueens := append(placedQueens, pos)
+			places = append(places, placeQueensRecur(newPlacedQueens)...)
+		}
+	}
+
+	return places
+}
+
+func checkQueens(placedQueens []GridCoords, pos GridCoords) bool {
+	for i := range placedQueens {
+		queen := placedQueens[i]
+		if queen.Col == pos.Col {
+			return false
+		}
+
+		if Abs(queen.Row-pos.Row) == Abs(queen.Col-pos.Col) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Calculate the absolute value of x.
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+
+	return x
+}
