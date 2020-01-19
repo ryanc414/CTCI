@@ -352,3 +352,62 @@ func Permutations(input string) []string {
 
 	return perms
 }
+
+// Find all the unique permutations of a string, that may contain duplicate
+// characters.
+func UniquePermutations(input string) []string {
+	if len(input) == 0 {
+		return nil
+	}
+
+	charCounts := make(map[byte]int)
+	for i := range input {
+		charCounts[input[i]]++
+	}
+
+	return permutationsRecur(charCounts)
+}
+
+func permutationsRecur(charCounts map[byte]int) []string {
+	var perms []string
+
+	for k, v := range charCounts {
+		if v == 0 {
+			continue
+		}
+
+		charCounts[k]--
+		tailPerms := permutationsRecur(charCounts)
+		charCounts[k]++
+
+		if tailPerms == nil {
+			return []string{buildBaseString(k, v)}
+		}
+
+		for i := range tailPerms {
+			perms = append(perms, appendTailString(k, tailPerms[i]))
+		}
+
+	}
+
+	return perms
+}
+
+func buildBaseString(baseChar byte, numTimes int) string {
+	bytes := make([]byte, numTimes)
+	for i := range bytes {
+		bytes[i] = baseChar
+	}
+
+	return string(bytes)
+}
+
+func appendTailString(char byte, tailString string) string {
+	bytes := make([]byte, len(tailString)+1)
+	bytes[0] = char
+	for i := range tailString {
+		bytes[i+1] = tailString[i]
+	}
+
+	return string(bytes)
+}

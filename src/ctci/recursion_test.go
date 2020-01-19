@@ -202,7 +202,7 @@ func TestTowersOfHanoi(t *testing.T) {
 	}
 }
 
-// Calculate permutations of a string with unique chars.
+// Test calculating permutations of a string with unique chars.
 func TestPermutations(t *testing.T) {
 	perms := Permutations("abc")
 	expectedPerms := []string{
@@ -224,4 +224,46 @@ func TestPermutations(t *testing.T) {
 			}
 		}
 	}
+}
+
+// Test calculating permutations of a string with non-unique chars. Each
+// permutation should be unique.
+func TestUniquePermutations(t *testing.T) {
+	perms := UniquePermutations("aabc")
+	expectedPerms := []string{
+		"aabc",
+		"aacb",
+		"abac",
+		"abca",
+		"acab",
+		"acba",
+		"baac",
+		"baca",
+		"bcaa",
+		"caab",
+		"caba",
+		"cbaa",
+	}
+
+	if !compareUnordered(perms, expectedPerms) {
+		t.Error(perms)
+	}
+}
+
+// Compare two slices of strings without caring about order.
+func compareUnordered(actual, expected []string) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+
+	sort.Strings(actual)
+	sort.Strings(expected)
+
+	for i := range actual {
+		if actual[i] != expected[i] {
+			return false
+		}
+	}
+
+	return true
 }
