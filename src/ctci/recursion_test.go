@@ -1,7 +1,9 @@
 package ctci
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -281,4 +283,85 @@ func TestParens(t *testing.T) {
 	if !compareUnordered(parens, expected) {
 		t.Error(parens)
 	}
+}
+
+// Test the PaintFill function.
+func TestPaintFill(t *testing.T) {
+	screen := makeScreen()
+	expected := makeScreen()
+
+	drawRectangle(screen, Color{Red: 255, Green: 255, Blue: 255})
+	drawRectangle(expected, Color{Red: 255, Green: 255, Blue: 255})
+	displayScreen(screen)
+
+	fillManually(expected, Color{Red: 255, Green: 0, Blue: 0})
+	PaintFill(
+		screen,
+		GridCoords{Row: 15, Col: 15},
+		Color{Red: 255, Green: 0, Blue: 0},
+	)
+
+	displayScreen(screen)
+	displayScreen(expected)
+	if !compareColorScreens(screen, expected) {
+		t.Error(screen)
+	}
+}
+
+func makeScreen() [][]Color {
+	screen := make([][]Color, 32)
+	for i := range screen {
+		screen[i] = make([]Color, 32)
+	}
+
+	return screen
+}
+
+func drawRectangle(screen [][]Color, color Color) {
+	for i := 2; i < 31; i++ {
+		screen[i][2] = color
+		screen[i][30] = color
+		screen[2][i] = color
+		screen[30][i] = color
+	}
+}
+
+func fillManually(screen [][]Color, color Color) {
+	for row := 3; row < 30; row++ {
+		for col := 3; col < 30; col++ {
+			screen[row][col] = color
+		}
+	}
+}
+
+func compareColorScreens(actual, expected [][]Color) bool {
+	for row := range actual {
+		for col := range expected {
+			if actual[row][col] != expected[row][col] {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func displayScreen(screen [][]Color) {
+	var builder strings.Builder
+
+	for row := range screen {
+		for col := range screen[row] {
+			color := screen[row][col]
+			if color.Red == 0 {
+				builder.WriteByte(' ')
+			} else if color.Green == 0 {
+				builder.WriteByte('R')
+			} else {
+				builder.WriteByte('X')
+			}
+		}
+		builder.WriteByte('\n')
+	}
+
+	fmt.Println(builder.String())
 }

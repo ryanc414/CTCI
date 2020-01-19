@@ -450,3 +450,34 @@ func concatStrings(strs ...string) string {
 	}
 	return builder.String()
 }
+
+type Color struct {
+	Red   int
+	Green int
+	Blue  int
+}
+
+func PaintFill(screen [][]Color, point GridCoords, color Color) {
+	origColour := screen[point.Row][point.Col]
+	screen[point.Row][point.Col] = color
+
+	for i := range GridDirections {
+		nextPoint := point.MoveDirection(GridDirections[i])
+		if validCoords(screen, nextPoint) &&
+			screen[nextPoint.Row][nextPoint.Col] == origColour {
+			PaintFill(screen, nextPoint, color)
+		}
+	}
+}
+
+func validCoords(screen [][]Color, point GridCoords) bool {
+	if point.Row < 0 || point.Row >= len(screen) {
+		return false
+	}
+
+	if point.Col < 0 || point.Col >= len(screen[0]) {
+		return false
+	}
+
+	return true
+}
