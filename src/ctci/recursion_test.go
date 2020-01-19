@@ -292,7 +292,6 @@ func TestPaintFill(t *testing.T) {
 
 	drawRectangle(screen, Color{Red: 255, Green: 255, Blue: 255})
 	drawRectangle(expected, Color{Red: 255, Green: 255, Blue: 255})
-	displayScreen(screen)
 
 	fillManually(expected, Color{Red: 255, Green: 0, Blue: 0})
 	PaintFill(
@@ -301,8 +300,6 @@ func TestPaintFill(t *testing.T) {
 		Color{Red: 255, Green: 0, Blue: 0},
 	)
 
-	displayScreen(screen)
-	displayScreen(expected)
 	if !compareColorScreens(screen, expected) {
 		t.Error(screen)
 	}
@@ -364,4 +361,12 @@ func displayScreen(screen [][]Color) {
 	}
 
 	fmt.Println(builder.String())
+}
+
+// Test finding the number of ways of making a value with coins.
+func TestCoins(t *testing.T) {
+	numCombos := NumCoinCombos(25)
+	if numCombos != 13 {
+		t.Error(numCombos)
+	}
 }

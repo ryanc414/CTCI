@@ -481,3 +481,26 @@ func validCoords(screen [][]Color, point GridCoords) bool {
 
 	return true
 }
+
+// Count the number of ways of making a value with coins of 25, 10, 5 and 1.
+func NumCoinCombos(value int) int {
+	coinVals := []int{25, 10, 5, 1}
+	return numCoinCombosRecur(value, coinVals)
+}
+
+func numCoinCombosRecur(value int, coinVals []int) int {
+	// Base case
+	if value < 5 {
+		return 1
+	}
+
+	numCombos := 0
+
+	for i := range coinVals {
+		if coinVals[i] <= value {
+			numCombos += numCoinCombosRecur(value-coinVals[i], coinVals[i:])
+		}
+	}
+
+	return numCombos
+}
