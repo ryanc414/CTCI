@@ -267,3 +267,18 @@ func compareUnordered(actual, expected []string) bool {
 
 	return true
 }
+
+// Test generating combinations of parentheses.
+func TestParens(t *testing.T) {
+	parens := Parens(3)
+	expected := []string{
+		"((()))",
+		"(()())",
+		"()(())",
+		"()()()",
+	}
+
+	if !compareUnordered(parens, expected) {
+		t.Error(parens)
+	}
+}

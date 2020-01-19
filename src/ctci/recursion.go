@@ -411,3 +411,42 @@ func appendTailString(char byte, tailString string) string {
 
 	return string(bytes)
 }
+
+func Parens(numPairs int) []string {
+	if numPairs < 0 {
+		panic("numPairs must be positive")
+	}
+
+	// Base cases.
+	switch numPairs {
+	case 0:
+		return nil
+
+	case 1:
+		return []string{"()"}
+
+	case 2:
+		return []string{"(())", "()()"}
+	}
+
+	var parens []string
+
+	tailParens := Parens(numPairs - 1)
+	for i := range tailParens {
+		parens = append(
+			parens,
+			concatStrings("(", tailParens[i], ")"),
+			concatStrings("()", tailParens[i]),
+		)
+	}
+
+	return parens
+}
+
+func concatStrings(strs ...string) string {
+	var builder strings.Builder
+	for i := range strs {
+		builder.WriteString(strs[i])
+	}
+	return builder.String()
+}
