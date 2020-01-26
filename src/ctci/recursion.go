@@ -3,6 +3,7 @@ package ctci
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -550,4 +551,81 @@ func Abs(x int) int {
 	}
 
 	return x
+}
+
+type Box struct {
+	width  int
+	height int
+	depth  int
+}
+
+type byHeight []Box
+
+func (boxes byHeight) Len() int {
+	return len(boxes)
+}
+
+func (boxes byHeight) Less(i, j int) bool {
+	return boxes[i].height > boxes[j].height
+}
+
+func (boxes byHeight) Swap(i, j int) {
+	boxes[i], boxes[j] = boxes[j], boxes[i]
+}
+
+func TallestStack(boxes []Box) int {
+	sort.Sort(byHeight(boxes))
+	cache := make(map[int]int)
+	return tallestStackRecur(boxes, -1, cache)
+}
+
+func tallestStackRecur(boxes []Box, lastStacked int, cache map[int]int) int {
+	cachedVal, exist := cache[lastStacked]
+	if exist {
+		return cachedVal
+	}
+
+	first, end := possibleNextBoxes(boxes, lastStacked)
+	maxHeight := 0
+
+	for i := first; i < end; i++ {
+		height := boxes[i].height + tallestStackRecur(boxes, i, cache)
+
+		if height > maxHeight {
+			maxHeight = height
+		}
+	}
+
+	cache[lastStacked] = maxHeight
+	return maxHeight
+}
+
+func possibleNextBoxes(boxes []Box, lastStacked int) (int, int) {
+	first := firstPossibleNextBox(boxes, lastStacked)
+
+	for i := first + 1; i < len(boxes); i++ {
+		if dominatesBox(boxes[first], boxes[i]) {
+			return first, i
+		}
+	}
+
+	return first, len(boxes)
+}
+
+func firstPossibleNextBox(boxes []Box, lastStacked int) int {
+	if lastStacked == -1 {
+		return 0
+	}
+
+	for i := range boxes {
+		if dominatesBox(boxes[lastStacked], boxes[i]) {
+			return i
+		}
+	}
+
+	return len(boxes)
+}
+
+func dominatesBox(boxA, boxB Box) bool {
+	return boxA.width > boxB.width && boxA.height > boxB.height && boxA.depth > boxB.depth
 }

@@ -378,3 +378,20 @@ func TestEightQueens(t *testing.T) {
 		t.Error(queenPositions)
 	}
 }
+
+// Test finding the tallest possible stack from a set of boxes.
+func TestTallestStack(t *testing.T) {
+	boxes := []Box{
+		Box{height: 7, width: 8, depth: 2},
+		Box{height: 8, width: 6, depth: 10},
+		Box{height: 10, width: 1, depth: 1},
+		Box{height: 7, width: 7, depth: 7},
+		Box{height: 3, width: 1, depth: 3},
+		Box{height: 15, width: 12, depth: 13},
+	}
+
+	res := TallestStack(boxes)
+	if res != 26 {
+		t.Error(res)
+	}
+}
