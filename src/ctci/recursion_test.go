@@ -395,3 +395,16 @@ func TestTallestStack(t *testing.T) {
 		t.Error(res)
 	}
 }
+
+// Test counting the number of possible boolean evaluation orders.
+func TestBooleanEvaluation(t *testing.T) {
+	//numWays := BooleanEvaluation("1^0|0|1", false)
+	//if numWays != 2 {
+	//	t.Error(numWays)
+	//}
+
+	numWays := BooleanEvaluation("0&0&0&1^1|0", true)
+	if numWays != 10 {
+		t.Error(numWays)
+	}
+}

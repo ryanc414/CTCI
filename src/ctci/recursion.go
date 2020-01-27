@@ -629,3 +629,187 @@ func firstPossibleNextBox(boxes []Box, lastStacked int) int {
 func dominatesBox(boxA, boxB Box) bool {
 	return boxA.width > boxB.width && boxA.height > boxB.height && boxA.depth > boxB.depth
 }
+
+// Count the number of ways of parenthesising a boolean expression that gives
+// the desired result.
+func BooleanEvaluation(expr string, targetVal bool) int {
+	if len(expr) == 0 {
+		return 0
+	}
+
+	if !validBoolExpr(expr) {
+		panic("Invalid expression")
+	}
+
+	cache := make(map[boolExpr]int)
+
+	// Pre-cache the base cases.
+	cache[boolExpr{str: "1", target: true}] = 1
+	cache[boolExpr{str: "1", target: false}] = 0
+	cache[boolExpr{str: "0", target: true}] = 0
+	cache[boolExpr{str: "0", target: false}] = 1
+
+	return boolEvalRecur(boolExpr{str: expr, target: targetVal}, cache)
+}
+
+type boolExpr struct {
+	str    string
+	target bool
+}
+
+func boolEvalRecur(expr boolExpr, cache map[boolExpr]int) int {
+	// First check the cache.
+	cachedVal, exist := cache[expr]
+	if exist {
+		return cachedVal
+	}
+
+	// Iterate through the operators.
+	totalNumWays := 0
+	for i := 1; i < len(expr.str); i += 2 {
+		numWays := boolNumWays(expr, i, cache)
+		totalNumWays += numWays
+	}
+
+	// Cache the return value for this bool expression.
+	cache[expr] = totalNumWays
+	return totalNumWays
+}
+
+func boolNumWays(expr boolExpr, i int, cache map[boolExpr]int) int {
+	switch expr.str[i] {
+	case '|':
+		if expr.target {
+			// Require EITHER left or right sides to evaluate to true.
+			numWays := boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+
+			return numWays
+		} else {
+			// Require BOTH left or right sides to evaluate to false.
+			return boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+		}
+
+	case '&':
+		if expr.target {
+			// Require BOTH left or right sides to evaluate to true.
+			return boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+		} else {
+			// Require EITHER left or right sides to evaluate to false.
+			numWays := boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+			return numWays
+		}
+
+	case '^':
+		if expr.target {
+			// Require EITHER but not BOTH left or right sides to evaluate
+			// to true.
+			numWays := boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+
+			return numWays
+		} else {
+			// Require BOTH left or right to be true OR BOTH left or right
+			// to be false.
+			numWays := boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: true}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: true}, cache,
+			)
+
+			numWays += boolEvalRecur(
+				boolExpr{str: expr.str[:i], target: false}, cache,
+			) * boolEvalRecur(
+				boolExpr{str: expr.str[i+1:], target: false}, cache,
+			)
+			return numWays
+		}
+
+	default:
+		panic("Unexpected token")
+	}
+
+}
+
+func totalBoolPossibilities(boolExpr string) int {
+	if len(boolExpr) == 1 {
+		return 1
+	}
+	return (len(boolExpr) - 1) / 2
+}
+
+func validBoolExpr(boolExpr string) bool {
+	if len(boolExpr)%2 != 1 {
+		return false
+	}
+
+	for i := range boolExpr {
+		if i%2 == 0 {
+			switch boolExpr[i] {
+			case '0', '1':
+				continue
+
+			default:
+				return false
+			}
+		} else {
+			switch boolExpr[i] {
+			case '|', '&', '^':
+				continue
+
+			default:
+				return false
+			}
+		}
+	}
+
+	return true
+}
