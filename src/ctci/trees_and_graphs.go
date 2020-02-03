@@ -47,6 +47,106 @@ func (graph Graph) RouteExists(nodeS, nodeE *GraphNode) bool {
 	return false
 }
 
+type PathNode struct {
+	person       *GraphNode
+	previousNode *PathNode
+}
+
+type BFSData struct {
+	toVisit []*PathNode
+	visited map[string]*PathNode
+}
+
+// Find the shortest route between two nodes.
+func (graph Graph) FindShortestPath(nodeA, nodeB *GraphNode) ([]*GraphNode, error) {
+	sourceData := newBFSData(nodeA)
+	destData := newBFSData(nodeB)
+
+	for !sourceData.isFinished() && !destData.isFinished() {
+		collision := searchLevel(graph, sourceData, destData)
+		if collision != nil {
+			return mergePaths(sourceData, destData, collision), nil
+		}
+
+		collision = searchLevel(graph, destData, sourceData)
+		if collision != nil {
+			return mergePaths(sourceData, destData, collision), nil
+		}
+	}
+
+	return nil, errors.New("No path found")
+}
+
+func searchLevel(graph Graph, primary, secondary *BFSData) *GraphNode {
+	var nextToVisit []*PathNode
+
+	for i := range primary.toVisit {
+		pathNode := primary.toVisit[i]
+		personName := pathNode.person.name
+
+		_, visited := secondary.visited[personName]
+		if visited {
+			return pathNode.person
+		}
+
+		person := pathNode.person
+		friends := person.adjacent
+
+		for j := range friends {
+			friend := friends[j]
+			_, visited = primary.visited[friend.name]
+			if !visited {
+				next := &PathNode{person: friend, previousNode: pathNode}
+				primary.visited[friend.name] = next
+				nextToVisit = append(nextToVisit, next)
+			}
+		}
+	}
+
+	primary.toVisit = nextToVisit
+	return nil
+}
+
+func mergePaths(bfs1, bfs2 *BFSData, connection *GraphNode) []*GraphNode {
+	end1 := bfs1.visited[connection.name]
+	end2 := bfs2.visited[connection.name]
+
+	pathOne := end1.collapse(false)
+	pathTwo := end2.collapse(true)[1:]
+
+	pathOne = append(pathOne, pathTwo...)
+	return pathOne
+}
+
+func (pathNode *PathNode) collapse(startsWithRoot bool) []*GraphNode {
+	var path []*GraphNode
+	node := pathNode
+	for node != nil {
+		if startsWithRoot {
+			path = append(path, node.person)
+		} else {
+			path = append([]*GraphNode{node.person}, path...)
+		}
+		node = node.previousNode
+	}
+	return path
+}
+
+func (data *BFSData) isFinished() bool {
+	return len(data.toVisit) == 0
+}
+
+func newBFSData(node *GraphNode) *BFSData {
+	sourcePath := &PathNode{person: node, previousNode: nil}
+	visited := make(map[string]*PathNode)
+	visited[node.name] = sourcePath
+
+	return &BFSData{
+		toVisit: []*PathNode{sourcePath},
+		visited: visited,
+	}
+}
+
 // A node in a binary search tree.
 type BSTNode struct {
 	value  int

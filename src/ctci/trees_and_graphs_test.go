@@ -53,6 +53,64 @@ func TestRouteExists(t *testing.T) {
 	}
 }
 
+func TestShortestRoute(t *testing.T) {
+	graph := Graph{
+		nodes: make([]GraphNode, 6),
+	}
+
+	graph.nodes[0].name = "A"
+	graph.nodes[0].adjacent = []*GraphNode{
+		&graph.nodes[1],
+		&graph.nodes[2],
+		&graph.nodes[4],
+	}
+
+	graph.nodes[1].name = "B"
+	graph.nodes[1].adjacent = []*GraphNode{
+		&graph.nodes[0],
+		&graph.nodes[2],
+		&graph.nodes[3],
+		&graph.nodes[4],
+	}
+
+	graph.nodes[2].name = "C"
+	graph.nodes[2].adjacent = []*GraphNode{
+		&graph.nodes[0],
+		&graph.nodes[1],
+		&graph.nodes[4],
+	}
+
+	graph.nodes[3].name = "D"
+	graph.nodes[3].adjacent = []*GraphNode{
+		&graph.nodes[1],
+		&graph.nodes[5],
+	}
+
+	graph.nodes[4].name = "E"
+	graph.nodes[4].adjacent = []*GraphNode{
+		&graph.nodes[0],
+		&graph.nodes[1],
+		&graph.nodes[2],
+		&graph.nodes[5],
+	}
+
+	graph.nodes[5].name = "F"
+	graph.nodes[5].adjacent = []*GraphNode{
+		&graph.nodes[3],
+		&graph.nodes[4],
+	}
+
+	path, err := graph.FindShortestPath(&graph.nodes[0], &graph.nodes[1])
+	if err != nil || len(path) != 2 {
+		t.Errorf("err = %v, path = %v", err, path)
+	}
+
+	path, err = graph.FindShortestPath(&graph.nodes[0], &graph.nodes[5])
+	if err != nil || len(path) != 3 {
+		t.Errorf("err = %v, path = %v", err, path)
+	}
+}
+
 // Test the GenerateBST function.
 func TestGenerateBST(t *testing.T) {
 	inputArr := []int{1, 3, 4, 8, 10, 11, 15, 21}
