@@ -34,6 +34,34 @@ func TestSortedMerge(t *testing.T) {
 	}
 }
 
+func TestGroupAnagrams(t *testing.T) {
+	words := []string{
+		"abcde",
+		"aaaaa",
+		"b",
+		"bcdea",
+		"cde",
+		"edcba",
+	}
+
+	GroupAnagrams(words)
+	expectedGrouped := []string{
+		"aaaaa",
+		"abcde",
+		"bcdea",
+		"edcba",
+		"b",
+		"cde",
+	}
+
+	for i := range words {
+		if words[i] != expectedGrouped[i] {
+			t.Error(words)
+			break
+		}
+	}
+}
+
 func equalIntSlices(arrA, arrB []int) bool {
 	if len(arrA) != len(arrB) {
 		return false
