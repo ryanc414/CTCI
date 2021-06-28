@@ -1,4 +1,4 @@
-package ctci
+package stacks
 
 import (
 	"container/list"
@@ -24,46 +24,46 @@ type Queue interface {
 }
 
 // Basic implementation of a stack, using a dynamic expanding array slice.
-type basicStack struct {
-	data []interface{}
+type BasicStack struct {
+	Data []interface{}
 }
 
 // Construct a new empty stack.
-func NewBasicStack() *basicStack {
-	return &basicStack{}
+func NewBasicStack() *BasicStack {
+	return &BasicStack{}
 }
 
 // Pop an element from the stack - pops last element from the slice.
-func (stack *basicStack) Pop() (interface{}, error) {
+func (stack *BasicStack) Pop() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
 
-	newLen := len(stack.data) - 1
+	newLen := len(stack.Data) - 1
 	var popped interface{}
-	popped, stack.data = stack.data[newLen], stack.data[:newLen]
+	popped, stack.Data = stack.Data[newLen], stack.Data[:newLen]
 
 	return popped, nil
 }
 
 // Push an element onto the stack - item is appended to the slice.
-func (stack *basicStack) Push(item interface{}) {
-	stack.data = append(stack.data, item)
+func (stack *BasicStack) Push(item interface{}) {
+	stack.Data = append(stack.Data, item)
 }
 
 // Peek at the top element in the stack.
-func (stack basicStack) Peek() (interface{}, error) {
+func (stack BasicStack) Peek() (interface{}, error) {
 	if stack.IsEmpty() {
 		return 0, errors.New("Stack is empty")
 	}
 
-	return stack.data[len(stack.data)-1], nil
+	return stack.Data[len(stack.Data)-1], nil
 }
 
 // Check if the stack is empty, by checking if the data slice has a non-zero
 // length.
-func (stack basicStack) IsEmpty() bool {
-	return len(stack.data) == 0
+func (stack BasicStack) IsEmpty() bool {
+	return len(stack.Data) == 0
 }
 
 // Implement a basic queue using a linked list.
@@ -343,8 +343,8 @@ func (stacks *setOfStacks) IsEmpty() bool {
 // The MyQueue type implements the Queue interface but is actually implemented
 // using two stacks.
 type myQueue struct {
-	inStack  basicStack
-	outStack basicStack
+	inStack  BasicStack
+	outStack BasicStack
 }
 
 // Construct a new myQueue.

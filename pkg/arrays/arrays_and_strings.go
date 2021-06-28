@@ -1,4 +1,4 @@
-package ctci
+package arrays
 
 import (
 	"fmt"

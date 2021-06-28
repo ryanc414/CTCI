@@ -1,7 +1,9 @@
-package ctci
+package arrays
 
-import "testing"
-import "bytes"
+import (
+	"bytes"
+	"testing"
+)
 
 // Test the IsUnique function.
 func TestIsUnique(t *testing.T) {

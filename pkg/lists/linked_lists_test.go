@@ -1,4 +1,4 @@
-package ctci
+package lists
 
 import "testing"
 

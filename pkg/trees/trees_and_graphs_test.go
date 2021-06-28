@@ -1,4 +1,4 @@
-package ctci
+package trees
 
 import (
 	"container/list"

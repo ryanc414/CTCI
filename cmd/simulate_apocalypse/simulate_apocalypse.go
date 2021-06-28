@@ -1,15 +1,16 @@
 package main
 
 import (
-	"ctci"
 	"fmt"
 	"math/rand"
+
+	"github.com/ryanc414/ctci/pkg/objects"
 )
 
 const NUM_TRIALS = 1000000
 
 func main() {
-	ctci.SeedRng()
+	objects.SeedRng()
 
 	results := make([]int, NUM_TRIALS)
 	for i := 0; i < NUM_TRIALS; i++ {

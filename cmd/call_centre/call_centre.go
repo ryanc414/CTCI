@@ -1,11 +1,12 @@
 package main
 
 import (
-	"ctci"
 	"fmt"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/ryanc414/ctci/pkg/stacks"
 )
 
 func main() {
@@ -37,7 +38,7 @@ const (
 )
 
 type EmployeePool struct {
-	available *ctci.BasicQueue
+	available *stacks.BasicQueue
 	busy      map[int]*Employee
 	category  EmployeeCategory
 	mutex     sync.Mutex
@@ -66,7 +67,7 @@ func InitCallCentre(
 func InitEmployeePool(
 	numEmployees int, category EmployeeCategory,
 ) *EmployeePool {
-	available := ctci.NewBasicQueue()
+	available := stacks.NewBasicQueue()
 	for i := 0; i < numEmployees; i++ {
 		available.Add(InitEmployee(i, category))
 	}

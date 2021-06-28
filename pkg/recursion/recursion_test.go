@@ -1,10 +1,12 @@
-package ctci
+package recursion
 
 import (
 	"fmt"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/ryanc414/ctci/pkg/objects"
 )
 
 // Test calculating the number of step ways recursively and iteratively.
@@ -27,14 +29,14 @@ func TestRobotPaths(t *testing.T) {
 	// First try with an empty grid (all paths valid). The first path found
 	// should be the one that goes right 4 times, then down 4 times.
 	expected := RobotPath{
-		Right,
-		Right,
-		Right,
-		Right,
-		Down,
-		Down,
-		Down,
-		Down,
+		objects.Right,
+		objects.Right,
+		objects.Right,
+		objects.Right,
+		objects.Down,
+		objects.Down,
+		objects.Down,
+		objects.Down,
 	}
 
 	path, err := grid.FindPath()
@@ -60,18 +62,18 @@ func TestRobotPaths(t *testing.T) {
 	grid[6][5] = false
 
 	expected = RobotPath{
-		Right,
-		Right,
-		Right,
-		Right,
-		Down,
-		Down,
-		Down,
-		Down,
-		Right,
-		Down,
-		Right,
-		Down,
+		objects.Right,
+		objects.Right,
+		objects.Right,
+		objects.Right,
+		objects.Down,
+		objects.Down,
+		objects.Down,
+		objects.Down,
+		objects.Right,
+		objects.Down,
+		objects.Right,
+		objects.Down,
 	}
 
 	path, err = grid.FindPath()
@@ -296,7 +298,7 @@ func TestPaintFill(t *testing.T) {
 	fillManually(expected, Color{Red: 255, Green: 0, Blue: 0})
 	PaintFill(
 		screen,
-		GridCoords{Row: 15, Col: 15},
+		objects.GridCoords{Row: 15, Col: 15},
 		Color{Red: 255, Green: 0, Blue: 0},
 	)
 
@@ -382,12 +384,12 @@ func TestEightQueens(t *testing.T) {
 // Test finding the tallest possible stack from a set of boxes.
 func TestTallestStack(t *testing.T) {
 	boxes := []Box{
-		Box{height: 7, width: 8, depth: 2},
-		Box{height: 8, width: 6, depth: 10},
-		Box{height: 10, width: 1, depth: 1},
-		Box{height: 7, width: 7, depth: 7},
-		Box{height: 3, width: 1, depth: 3},
-		Box{height: 15, width: 12, depth: 13},
+		{height: 7, width: 8, depth: 2},
+		{height: 8, width: 6, depth: 10},
+		{height: 10, width: 1, depth: 1},
+		{height: 7, width: 7, depth: 7},
+		{height: 3, width: 1, depth: 3},
+		{height: 15, width: 12, depth: 13},
 	}
 
 	res := TallestStack(boxes)

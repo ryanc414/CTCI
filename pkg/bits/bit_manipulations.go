@@ -1,4 +1,4 @@
-package ctci
+package bits
 
 import (
 	"errors"
@@ -74,6 +74,13 @@ func FlipBitToWin(x int32) int {
 	}
 
 	return maxLength
+}
+
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
 }
 
 // Get the next smallest integer with the same number of binary 1s.

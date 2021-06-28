@@ -2,18 +2,19 @@ package main
 
 import (
 	"bufio"
-	"ctci"
 	"errors"
 	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/ryanc414/ctci/pkg/objects"
 )
 
 // Seend the RNG and play a new game.
 func main() {
-	ctci.SeedRng()
+	objects.SeedRng()
 	game := InitGame(10, 6)
 	game.Play()
 }
@@ -92,7 +93,7 @@ func (game Game) display() {
 
 		for col := range game.grid[row] {
 			builder.WriteRune(game.grid.CellChar(
-				ctci.GridCoords{Row: row, Col: col},
+				objects.GridCoords{Row: row, Col: col},
 			))
 			builder.WriteRune(' ')
 		}
@@ -103,7 +104,7 @@ func (game Game) display() {
 }
 
 // Get a valid row and column input from the user.
-func (game Game) getCoordsInput() ctci.GridCoords {
+func (game Game) getCoordsInput() objects.GridCoords {
 	coords := promptCoords()
 	for !game.grid.validCoords(coords) ||
 		game.grid[coords.Row][coords.Col]&Explored != 0 {
@@ -115,7 +116,7 @@ func (game Game) getCoordsInput() ctci.GridCoords {
 }
 
 // Apply a game action to a specified cell.
-func (game Game) applyAction(action GameAction, coords ctci.GridCoords) {
+func (game Game) applyAction(action GameAction, coords objects.GridCoords) {
 	switch action {
 	case Explore:
 		game.grid[coords.Row][coords.Col] |= Explored
@@ -137,9 +138,9 @@ func (game Game) applyAction(action GameAction, coords ctci.GridCoords) {
 }
 
 // Explore all neighbours, when it is known there are no bombs.
-func (game Game) exploreNeighbours(coords ctci.GridCoords) {
-	for i := range ctci.GridDirections {
-		newCoords := coords.MoveDirection(ctci.GridDirections[i])
+func (game Game) exploreNeighbours(coords objects.GridCoords) {
+	for i := range objects.GridDirections {
+		newCoords := coords.MoveDirection(objects.GridDirections[i])
 		if game.grid.validCoords(newCoords) &&
 			game.grid[newCoords.Row][newCoords.Col]&Explored == 0 {
 			game.applyAction(Explore, newCoords)
@@ -207,7 +208,7 @@ func InitGrid(size, numBombs int) Grid {
 }
 
 // Check if row and column indices are valid.
-func (grid Grid) validCoords(coords ctci.GridCoords) bool {
+func (grid Grid) validCoords(coords objects.GridCoords) bool {
 	if coords.Row < 0 || coords.Row >= len(grid) {
 		return false
 	}
@@ -220,7 +221,7 @@ func (grid Grid) validCoords(coords ctci.GridCoords) bool {
 }
 
 // Return a character to represent a cell in the grid.
-func (grid Grid) CellChar(coords ctci.GridCoords) rune {
+func (grid Grid) CellChar(coords objects.GridCoords) rune {
 	cell := grid[coords.Row][coords.Col]
 	if cell&Explored != 0 {
 		if cell&Bomb != 0 {
@@ -243,11 +244,11 @@ func (grid Grid) CellChar(coords ctci.GridCoords) rune {
 }
 
 // Count the number of neighbouring bombs.
-func (grid Grid) countNeighbourBombs(coords ctci.GridCoords) int {
+func (grid Grid) countNeighbourBombs(coords objects.GridCoords) int {
 	bombCount := 0
 
-	for i := range ctci.GridDirections {
-		newCoords := coords.MoveDirection(ctci.GridDirections[i])
+	for i := range objects.GridDirections {
+		newCoords := coords.MoveDirection(objects.GridDirections[i])
 		if grid.validCoords(newCoords) &&
 			grid[newCoords.Row][newCoords.Col]&Bomb != 0 {
 			bombCount++
@@ -304,12 +305,12 @@ func promptAction() GameAction {
 }
 
 // Prompt for user to enter a row and column
-func promptCoords() ctci.GridCoords {
+func promptCoords() objects.GridCoords {
 	fmt.Println("Enter row and column:")
 	row := getIntInput("row:\n> ")
 	col := getIntInput("col:\n> ")
 
-	return ctci.GridCoords{Row: row, Col: col}
+	return objects.GridCoords{Row: row, Col: col}
 }
 
 // Get an integer input from user.

@@ -1,4 +1,4 @@
-package ctci
+package stacks
 
 import "testing"
 

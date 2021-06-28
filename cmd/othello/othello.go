@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"ctci"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/ryanc414/ctci/pkg/objects"
 )
 
 // Play a single game of Othello.
@@ -39,7 +40,7 @@ const (
 // colour.
 type Piece struct {
 	colour   Colour
-	position ctci.GridCoords
+	position objects.GridCoords
 }
 
 type Colour int
@@ -51,7 +52,7 @@ const (
 
 type Player interface {
 	Name() string
-	ChooseMove(board *Board) ctci.GridCoords
+	ChooseMove(board *Board) objects.GridCoords
 }
 
 // Implements the Player interface. Prompts a human for input when making
@@ -75,16 +76,16 @@ func InitBoard() *Board {
 	// Place the initial pieces: two white and two black in the centre of the
 	// board.
 	board.grid[3][3] = &Piece{
-		colour: White, position: ctci.GridCoords{Row: 3, Col: 3},
+		colour: White, position: objects.GridCoords{Row: 3, Col: 3},
 	}
 	board.grid[4][4] = &Piece{
-		colour: White, position: ctci.GridCoords{Row: 4, Col: 4},
+		colour: White, position: objects.GridCoords{Row: 4, Col: 4},
 	}
 	board.grid[3][4] = &Piece{
-		colour: Black, position: ctci.GridCoords{Row: 3, Col: 4},
+		colour: Black, position: objects.GridCoords{Row: 3, Col: 4},
 	}
 	board.grid[4][3] = &Piece{
-		colour: Black, position: ctci.GridCoords{Row: 4, Col: 3},
+		colour: Black, position: objects.GridCoords{Row: 4, Col: 3},
 	}
 
 	return board
@@ -140,7 +141,7 @@ func (board *Board) PlayGame() {
 }
 
 // Validate a move.
-func (board *Board) ValidMove(move ctci.GridCoords, colour Colour) bool {
+func (board *Board) ValidMove(move objects.GridCoords, colour Colour) bool {
 	// Bounds checking.
 	if !board.checkBounds(move) {
 		return false
@@ -153,8 +154,8 @@ func (board *Board) ValidMove(move ctci.GridCoords, colour Colour) bool {
 
 	// Check if placing a piece here will form a terminated run of the opposite
 	// colour in any direction.
-	for i := range ctci.GridDirections {
-		if board.runExists(move, colour, ctci.GridDirections[i]) {
+	for i := range objects.GridDirections {
+		if board.runExists(move, colour, objects.GridDirections[i]) {
 			return true
 		}
 	}
@@ -178,7 +179,7 @@ func (board *Board) getCurrColour() Colour {
 }
 
 // Place a new piece on the board.
-func (board *Board) placePiece(nextMove ctci.GridCoords, colour Colour) {
+func (board *Board) placePiece(nextMove objects.GridCoords, colour Colour) {
 	// The move should have already been validated, but check again for sanity.
 	if !board.ValidMove(nextMove, colour) {
 		panic("Invalid move")
@@ -192,20 +193,20 @@ func (board *Board) placePiece(nextMove ctci.GridCoords, colour Colour) {
 // Flip all pieces of opposite colour that form terminated runs adjacent to
 // this new piece.
 func (board *Board) flipAllRuns(piece *Piece) {
-	for i := range ctci.GridDirections {
+	for i := range objects.GridDirections {
 		if board.runExists(
 			piece.position,
 			piece.colour,
-			ctci.GridDirections[i],
+			objects.GridDirections[i],
 		) {
-			board.flipRun(piece.position, piece.colour, ctci.GridDirections[i])
+			board.flipRun(piece.position, piece.colour, objects.GridDirections[i])
 		}
 	}
 }
 
 // Flip all consecutive pieces of the opposite colour in a given direction.
 func (board *Board) flipRun(
-	position ctci.GridCoords, colour Colour, direction ctci.GridDirection,
+	position objects.GridCoords, colour Colour, direction objects.GridDirection,
 ) {
 	position = position.MoveDirection(direction)
 	piece := board.grid[position.Row][position.Col]
@@ -218,7 +219,7 @@ func (board *Board) flipRun(
 }
 
 // Check if a given position is within the grid boundaries.
-func (board *Board) checkBounds(position ctci.GridCoords) bool {
+func (board *Board) checkBounds(position objects.GridCoords) bool {
 	if position.Row < 0 || position.Row >= len(board.grid) {
 		return false
 	}
@@ -233,7 +234,7 @@ func (board *Board) checkBounds(position ctci.GridCoords) bool {
 // Check if one or more pieces of opposite colour exist in a given direction,
 // terminated by a piece of our colour.
 func (board *Board) runExists(
-	move ctci.GridCoords, colour Colour, direction ctci.GridDirection,
+	move objects.GridCoords, colour Colour, direction objects.GridDirection,
 ) bool {
 	// First check if our immediate neighbour is a piece of the opposite
 	// colour. If not, there is no run so return false.
@@ -266,7 +267,7 @@ func (board *Board) runExists(
 func (board *Board) NoMovesPossible(colour Colour) bool {
 	for col := range board.grid {
 		for row := range board.grid[col] {
-			if board.ValidMove(ctci.GridCoords{Row: row, Col: col}, colour) {
+			if board.ValidMove(objects.GridCoords{Row: row, Col: col}, colour) {
 				return false
 			}
 		}
@@ -342,7 +343,7 @@ func (player HumanPlayer) Name() string {
 }
 
 // Return a valid next move for this player.
-func (player HumanPlayer) ChooseMove(board *Board) ctci.GridCoords {
+func (player HumanPlayer) ChooseMove(board *Board) objects.GridCoords {
 	fmt.Printf(
 		"%v (%v): your turn, please enter coords of next move.\n",
 		player.name,
@@ -359,11 +360,11 @@ func (player HumanPlayer) ChooseMove(board *Board) ctci.GridCoords {
 }
 
 // Prompt user to enter the coordinates of a move.
-func (player HumanPlayer) getCoordsInput() ctci.GridCoords {
+func (player HumanPlayer) getCoordsInput() objects.GridCoords {
 	row := player.getIntInput("Row: ")
 	col := player.getIntInput("Col: ")
 
-	return ctci.GridCoords{Row: row, Col: col}
+	return objects.GridCoords{Row: row, Col: col}
 }
 
 // Get an integer input from a human player.

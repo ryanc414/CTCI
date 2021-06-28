@@ -1,10 +1,13 @@
-package ctci
+package recursion
 
 import (
 	"errors"
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/ryanc414/ctci/pkg/objects"
+	"github.com/ryanc414/ctci/pkg/stacks"
 )
 
 // Calculate the number of ways of navigating a fixed number of steps in
@@ -59,10 +62,10 @@ func NumStepWaysIter(numSteps int) int {
 // The robot's grid is made up of spaces it can and cannot visit.
 type RobotGrid [][]bool
 
-type RobotPath []GridDirection
+type RobotPath []objects.GridDirection
 
 // The robot can only go right or down.
-var RobotDirections = []GridDirection{Right, Down}
+var RobotDirections = []objects.GridDirection{objects.Right, objects.Down}
 
 // Return a new grid for a robot of given size. Initially all squares are set
 // to true.
@@ -89,14 +92,14 @@ func (grid RobotGrid) FindPath() (RobotPath, error) {
 	}
 
 	return grid.findPathRecur(
-		GridCoords{Row: 0, Col: 0},
+		objects.GridCoords{Row: 0, Col: 0},
 		make(RobotPath, 0, len(grid)),
 	)
 }
 
 // Recursive implementation.
 func (grid RobotGrid) findPathRecur(
-	currPos GridCoords, currPath RobotPath,
+	currPos objects.GridCoords, currPath RobotPath,
 ) (RobotPath, error) {
 	// Base case: if we are at the end, return the current path.
 	if currPos.Row == len(grid)-1 && currPos.Col == len(grid[0])-1 {
@@ -119,7 +122,7 @@ func (grid RobotGrid) findPathRecur(
 	return nil, errors.New("No valid path found.")
 }
 
-func (grid RobotGrid) validCoords(coords GridCoords) bool {
+func (grid RobotGrid) validCoords(coords objects.GridCoords) bool {
 	if coords.Row < 0 || coords.Row >= len(grid) {
 		return false
 	}
@@ -204,7 +207,7 @@ func MultiplyRecur(a, b int) int {
 
 // Represent the Towers of Hanoi by an array of three stacks.
 type TowersOfHanoi struct {
-	stacks    [3]Stack
+	stacks    [3]stacks.Stack
 	numPieces int
 }
 
@@ -215,7 +218,7 @@ func InitTowersOfHanoi(numPieces int) TowersOfHanoi {
 
 	// Initialise three stacks.
 	for i := 0; i < 3; i++ {
-		towers.stacks[i] = NewBasicStack()
+		towers.stacks[i] = stacks.NewBasicStack()
 	}
 
 	// Place pieces on the left stack.
@@ -269,7 +272,7 @@ func (towers TowersOfHanoi) movePiece(fromTower, toTower int) {
 func (towers TowersOfHanoi) Display() {
 	maxTowerSize := 0
 	for i := range towers.stacks {
-		towerSize := len(towers.stacks[i].(*basicStack).data)
+		towerSize := len(towers.stacks[i].(*stacks.BasicStack).Data)
 		if towerSize > maxTowerSize {
 			maxTowerSize = towerSize
 		}
@@ -281,7 +284,7 @@ func (towers TowersOfHanoi) Display() {
 
 	for i := maxTowerSize - 1; i >= 0; i-- {
 		for j := range towers.stacks {
-			stackData := towers.stacks[j].(*basicStack).data
+			stackData := towers.stacks[j].(*stacks.BasicStack).Data
 			if i < len(stackData) {
 				builder.WriteString(renderPiece(stackData[i].(int)))
 			} else {
@@ -458,12 +461,12 @@ type Color struct {
 	Blue  int
 }
 
-func PaintFill(screen [][]Color, point GridCoords, color Color) {
+func PaintFill(screen [][]Color, point objects.GridCoords, color Color) {
 	origColour := screen[point.Row][point.Col]
 	screen[point.Row][point.Col] = color
 
-	for i := range GridDirections {
-		nextPoint := point.MoveDirection(GridDirections[i])
+	for i := range objects.GridDirections {
+		nextPoint := point.MoveDirection(objects.GridDirections[i])
 		if validCoords(screen, nextPoint) &&
 			screen[nextPoint.Row][nextPoint.Col] == origColour {
 			PaintFill(screen, nextPoint, color)
@@ -471,7 +474,7 @@ func PaintFill(screen [][]Color, point GridCoords, color Color) {
 	}
 }
 
-func validCoords(screen [][]Color, point GridCoords) bool {
+func validCoords(screen [][]Color, point objects.GridCoords) bool {
 	if point.Row < 0 || point.Row >= len(screen) {
 		return false
 	}
@@ -506,20 +509,20 @@ func numCoinCombosRecur(value int, coinVals []int) int {
 	return numCombos
 }
 
-func PlaceEightQueens() [][]GridCoords {
+func PlaceEightQueens() [][]objects.GridCoords {
 	return placeQueensRecur(nil)
 }
 
-func placeQueensRecur(placedQueens []GridCoords) [][]GridCoords {
+func placeQueensRecur(placedQueens []objects.GridCoords) [][]objects.GridCoords {
 	row := len(placedQueens)
 
 	if row == 8 {
-		return [][]GridCoords{placedQueens}
+		return [][]objects.GridCoords{placedQueens}
 	}
 
-	var places [][]GridCoords
+	var places [][]objects.GridCoords
 	for col := 0; col < 8; col++ {
-		pos := GridCoords{Row: row, Col: col}
+		pos := objects.GridCoords{Row: row, Col: col}
 		if checkQueens(placedQueens, pos) {
 			newPlacedQueens := append(placedQueens, pos)
 			places = append(places, placeQueensRecur(newPlacedQueens)...)
@@ -529,7 +532,7 @@ func placeQueensRecur(placedQueens []GridCoords) [][]GridCoords {
 	return places
 }
 
-func checkQueens(placedQueens []GridCoords, pos GridCoords) bool {
+func checkQueens(placedQueens []objects.GridCoords, pos objects.GridCoords) bool {
 	for i := range placedQueens {
 		queen := placedQueens[i]
 		if queen.Col == pos.Col {

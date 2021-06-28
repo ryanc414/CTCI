@@ -1,9 +1,11 @@
-package ctci
+package trees
 
 import (
 	"container/list"
 	"errors"
 	"math/rand"
+
+	"github.com/ryanc414/ctci/pkg/stacks"
 )
 
 type GraphNode struct {
@@ -17,7 +19,7 @@ type Graph struct {
 }
 
 func (graph Graph) RouteExists(nodeS, nodeE *GraphNode) bool {
-	queue := NewBasicQueue()
+	queue := stacks.NewBasicQueue()
 	for i := range graph.nodes {
 		graph.nodes[i].visited = false
 	}
@@ -467,6 +469,13 @@ func FindCommonAncestor(root, nodeA, nodeB *BinTreeNode) (*BinTreeNode, error) {
 	}
 
 	return ancestor, nil
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
 
 // Find the path to a given node in a binary tree.
