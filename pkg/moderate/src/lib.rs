@@ -30,6 +30,17 @@ mod tests {
             })
         )
     }
+
+    #[test]
+    fn test_find_winner() {
+        let grid = TicTacToeGrid::from_string("XX \nO X\n  O").unwrap();
+        let winner = grid.find_winner();
+        assert_eq!(winner, None);
+
+        let grid = TicTacToeGrid::from_string("XXO\nOOX\nO X").unwrap();
+        let winner = grid.find_winner();
+        assert_eq!(winner, Some(TicTacToeSymbol::Circle));
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -68,4 +79,99 @@ pub fn find_intersection(l1: &Line, l2: &Line) -> Option<Point> {
     let y = (m1 * x) + c1;
 
     Some(Point { x, y })
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum TicTacToeSymbol {
+    Circle,
+    Cross,
+}
+
+#[derive(Debug)]
+pub struct ParseErr;
+
+impl TicTacToeSymbol {
+    pub fn from(c: char) -> Result<Option<TicTacToeSymbol>, ParseErr> {
+        match c {
+            'o' | 'O' => Ok(Some(TicTacToeSymbol::Circle)),
+            'x' | 'X' => Ok(Some(TicTacToeSymbol::Cross)),
+            ' ' => Ok(None),
+            _ => Err(ParseErr),
+        }
+    }
+}
+
+pub struct TicTacToeGrid([[Option<TicTacToeSymbol>; 3]; 3]);
+
+impl TicTacToeGrid {
+    pub fn from_string(from: &str) -> Result<TicTacToeGrid, ParseErr> {
+        let rows: Vec<Vec<Option<TicTacToeSymbol>>> = from
+            .split('\n')
+            .map(|line| {
+                line.chars()
+                    .map(|c| TicTacToeSymbol::from(c).unwrap())
+                    .collect()
+            })
+            .collect();
+
+        if rows.len() != 3 {
+            return Err(ParseErr);
+        }
+
+        for r in rows.iter() {
+            if r.len() != 3 {
+                return Err(ParseErr);
+            }
+        }
+
+        let grid: [[Option<TicTacToeSymbol>; 3]; 3] = [
+            [rows[0][0], rows[0][1], rows[0][2]],
+            [rows[1][0], rows[1][1], rows[1][2]],
+            [rows[2][0], rows[2][1], rows[2][2]],
+        ];
+
+        Ok(TicTacToeGrid(grid))
+    }
+
+    pub fn find_winner(&self) -> Option<TicTacToeSymbol> {
+        // rows
+        for row in self.0.iter() {
+            if let Some(winner) = Self::row_winner(row) {
+                return Some(winner);
+            }
+        }
+
+        // cols
+        for i in 0..3 {
+            let col: [Option<TicTacToeSymbol>; 3] = [self.0[0][i], self.0[1][i], self.0[2][i]];
+            if let Some(winner) = Self::row_winner(&col) {
+                return Some(winner);
+            }
+        }
+
+        // diags
+        let diag = [self.0[0][0], self.0[1][1], self.0[2][2]];
+        if let Some(winner) = Self::row_winner(&diag) {
+            return Some(winner);
+        }
+
+        let diag = [self.0[0][2], self.0[1][1], self.0[2][0]];
+        if let Some(winner) = Self::row_winner(&diag) {
+            return Some(winner);
+        }
+
+        None
+    }
+
+    fn row_winner(row: &[Option<TicTacToeSymbol>; 3]) -> Option<TicTacToeSymbol> {
+        if row == &[Some(TicTacToeSymbol::Circle); 3] {
+            return Some(TicTacToeSymbol::Circle);
+        }
+
+        if row == &[Some(TicTacToeSymbol::Cross); 3] {
+            return Some(TicTacToeSymbol::Cross);
+        }
+
+        None
+    }
 }
