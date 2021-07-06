@@ -41,6 +41,15 @@ mod tests {
         let winner = grid.find_winner();
         assert_eq!(winner, Some(TicTacToeSymbol::Circle));
     }
+
+    #[test]
+    fn test_smallest_diff() {
+        let a = vec![1, 3, 15, 11, 2];
+        let b = vec![23, 127, 235, 19, 8];
+
+        let diff = smallest_difference(&a, &b);
+        assert_eq!(diff, Some(3));
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -174,4 +183,49 @@ impl TicTacToeGrid {
 
         None
     }
+}
+
+pub fn smallest_difference(a: &[i64], b: &[i64]) -> Option<i64> {
+    if a.is_empty() || b.is_empty() {
+        return None;
+    }
+
+    let mut a = a.to_owned();
+    a.sort_unstable();
+    let mut b = b.to_owned();
+    b.sort_unstable();
+
+    let mut i: usize = 0;
+    let mut smallest_diff: Option<i64> = None;
+
+    for n in a {
+        let (diff, j) = smallest_diff_from(n, &b[i..]).unwrap();
+        if smallest_diff.is_none() || diff < smallest_diff.unwrap() {
+            smallest_diff = Some(diff);
+        }
+        i += j;
+    }
+
+    smallest_diff
+}
+
+fn smallest_diff_from(n: i64, b: &[i64]) -> Option<(i64, usize)> {
+    let mut smallest_diff_vals: Option<(i64, usize)> = None;
+
+    for (i, &m) in b.iter().enumerate() {
+        let diff = if m > n { m - n } else { n - m };
+
+        match smallest_diff_vals {
+            None => smallest_diff_vals = Some((diff, i)),
+            Some((smol_diff, _)) => {
+                if diff < smol_diff {
+                    smallest_diff_vals = Some((diff, i));
+                } else {
+                    return smallest_diff_vals;
+                }
+            }
+        }
+    }
+
+    smallest_diff_vals
 }
