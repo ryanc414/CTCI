@@ -50,6 +50,14 @@ mod tests {
         let diff = smallest_difference(&a, &b);
         assert_eq!(diff, Some(3));
     }
+
+    #[test]
+    fn test_number_max() {
+        assert_eq!(number_max(3, 5), 5);
+        assert_eq!(number_max(1, 1), 1);
+        assert_eq!(number_max(44, -12), 44);
+        assert_eq!(number_max(-99, -121), -99);
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -228,4 +236,9 @@ fn smallest_diff_from(n: i64, b: &[i64]) -> Option<(i64, usize)> {
     }
 
     smallest_diff_vals
+}
+
+pub fn number_max(x: i64, y: i64) -> i64 {
+    let diff = (y - x).abs();
+    (x + y + diff) / 2
 }
